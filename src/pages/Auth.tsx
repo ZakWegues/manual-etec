@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { GraduationCap, Loader2, Mail, Lock, User } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { GraduationCap, Loader2, Mail, Lock, User, CheckCircle2, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
@@ -29,6 +30,8 @@ export default function Auth() {
   const navigate = useNavigate();
   const { signIn, signUp } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [showEmailVerificationAlert, setShowEmailVerificationAlert] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
 
   // Login form state
   const [loginEmail, setLoginEmail] = useState('');
@@ -65,7 +68,7 @@ export default function Auth() {
       if (error.message.includes('Invalid login credentials')) {
         toast.error('Email ou senha incorretos');
       } else if (error.message.includes('Email not confirmed')) {
-        toast.error('Por favor, confirme seu email antes de fazer login');
+        toast.error('Por favor, confirme seu email antes de fazer login. Verifique sua caixa de entrada.');
       } else {
         toast.error('Erro ao fazer login: ' + error.message);
       }
@@ -107,33 +110,56 @@ export default function Auth() {
         toast.error('Erro ao criar conta: ' + error.message);
       }
     } else {
-      toast.success('Conta criada! Verifique seu email para confirmar o cadastro.');
+      setRegisteredEmail(signupEmail);
+      setShowEmailVerificationAlert(true);
+      setSignupFullName('');
+      setSignupEmail('');
+      setSignupPassword('');
+      setSignupConfirmPassword('');
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--gradient-hero)' }}>
+    <div className="min-h-screen flex items-center justify-center p-3 sm:p-4" style={{ background: 'var(--gradient-hero)' }}>
       <div className="w-full max-w-md animate-fade-in">
-        <div className="flex flex-col items-center mb-8">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary shadow-lg mb-4">
-            <GraduationCap className="h-9 w-9 text-primary-foreground" />
+        <div className="flex flex-col items-center mb-6 sm:mb-8">
+          <div className="flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-2xl bg-primary shadow-lg mb-3 sm:mb-4">
+            <GraduationCap className="h-8 w-8 sm:h-9 sm:w-9 text-primary-foreground" />
           </div>
-          <h1 className="text-3xl font-bold text-white">Manual ETEC</h1>
-          <p className="text-white/70 mt-1">Plataforma Educacional</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">Manual ETEC</h1>
+          <p className="text-white/70 mt-1 text-sm sm:text-base">Plataforma Educacional</p>
         </div>
 
+        {/* Email Verification Alert */}
+        {showEmailVerificationAlert && (
+          <Alert className="mb-4 bg-success/10 border-success text-success-foreground">
+            <CheckCircle2 className="h-5 w-5 text-success" />
+            <AlertTitle className="text-success font-semibold">Conta criada com sucesso! 🎉</AlertTitle>
+            <AlertDescription className="mt-2 text-sm">
+              <p className="mb-2">Enviamos um email de confirmação para:</p>
+              <p className="font-medium text-success mb-2">{registeredEmail}</p>
+              <div className="flex items-start gap-2 mt-3 p-2 bg-background/50 rounded-md">
+                <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-muted-foreground">
+                  Por favor, verifique sua caixa de entrada (e a pasta de spam) e clique no link de confirmação para ativar sua conta.
+                </p>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+
         <Card className="shadow-xl border-0">
-          <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-2xl text-center">Bem-vindo!</CardTitle>
-            <CardDescription className="text-center">
+          <CardHeader className="space-y-1 pb-4 px-4 sm:px-6">
+            <CardTitle className="text-xl sm:text-2xl text-center">Bem-vindo!</CardTitle>
+            <CardDescription className="text-center text-sm">
               Faça login ou crie sua conta para continuar
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 sm:px-6">
             <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="login">Entrar</TabsTrigger>
-                <TabsTrigger value="signup">Criar Conta</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 mb-4 sm:mb-6">
+                <TabsTrigger value="login" className="text-sm">Entrar</TabsTrigger>
+                <TabsTrigger value="signup" className="text-sm">Criar Conta</TabsTrigger>
               </TabsList>
 
               <TabsContent value="login">
