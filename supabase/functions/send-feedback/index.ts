@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -8,6 +9,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
+
+// Fallback emails if we can't fetch admins
+const FALLBACK_EMAILS = ["zaksduwe@gmail.com"];
 
 interface FeedbackRequest {
   name: string;
@@ -40,9 +44,46 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Todos os campos são obrigatórios");
     }
 
+    // Get admin emails from database
+    let adminEmails: string[] = [];
+    try {
+      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+      const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+      // Get admin user IDs first
+      const { data: adminRoles } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'admin');
+
+      if (adminRoles && adminRoles.length > 0) {
+        const adminUserIds = adminRoles.map(r => r.user_id);
+        
+        // Get emails from profiles
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('email')
+          .in('user_id', adminUserIds);
+
+        if (profiles && profiles.length > 0) {
+          adminEmails = profiles.map(p => p.email).filter(Boolean) as string[];
+        }
+      }
+    } catch (e) {
+      console.error("Error fetching admin emails:", e);
+    }
+
+    // Use fallback if no admin emails found
+    if (adminEmails.length === 0) {
+      adminEmails = FALLBACK_EMAILS;
+    }
+
+    console.log("Sending feedback to admins:", adminEmails);
+
     const emailResponse = await resend.emails.send({
       from: "Manual ETEC <onboarding@resend.dev>",
-      to: ["zaksduwe@gmail.com"],
+      to: adminEmails,
       replyTo: email,
       subject: `[Manual ETEC] ${feedbackTypeLabels[type]} - Novo Feedback`,
       html: `

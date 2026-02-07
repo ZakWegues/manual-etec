@@ -1,4 +1,4 @@
-import { Calendar, BookOpen, GraduationCap, LayoutDashboard, LogOut, Settings, Users } from 'lucide-react';
+import { Calendar, BookOpen, GraduationCap, LayoutDashboard, LogOut, Settings, Users, Bot } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -23,6 +23,7 @@ const mainNavItems = [
   { title: 'Cronograma', url: '/schedule', icon: Calendar },
   { title: 'Matérias', url: '/subjects', icon: BookOpen },
   { title: 'Calendário', url: '/calendar', icon: Calendar },
+  { title: 'Assistente IA', url: '/ai-assistant', icon: Bot },
 ];
 
 const adminNavItems = [

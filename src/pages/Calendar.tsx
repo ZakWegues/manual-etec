@@ -3,9 +3,8 @@ import { useActivities, useToggleActivityProgress } from '@/hooks/useActivities'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, CheckCircle2, Clock, Loader2, Youtube } from 'lucide-react';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, CheckCircle2, Clock, Loader2, Youtube, AlertTriangle, Circle } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, isToday, isPast } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
@@ -13,10 +12,42 @@ import type { ActivityWithProgress } from '@/types/database';
 
 const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
+type ActivityStatus = 'completed' | 'pending' | 'overdue';
+
+const getActivityStatus = (activity: ActivityWithProgress): ActivityStatus => {
+  if (activity.is_completed) return 'completed';
+  const dueDate = new Date(activity.due_date);
+  if (isPast(dueDate) && !isToday(dueDate)) return 'overdue';
+  return 'pending';
+};
+
+const statusConfig = {
+  completed: {
+    label: 'Concluída',
+    icon: CheckCircle2,
+    badgeClass: 'bg-success text-success-foreground border-success',
+    dotClass: 'bg-success',
+    bgClass: 'bg-success/10 border-success/30',
+  },
+  pending: {
+    label: 'Pendente',
+    icon: Circle,
+    badgeClass: 'bg-warning text-warning-foreground border-warning',
+    dotClass: 'bg-warning',
+    bgClass: 'bg-warning/10 border-warning/30',
+  },
+  overdue: {
+    label: 'Atrasada',
+    icon: AlertTriangle,
+    badgeClass: 'bg-destructive text-destructive-foreground border-destructive',
+    dotClass: 'bg-destructive',
+    bgClass: 'bg-destructive/10 border-destructive/30',
+  },
+};
+
 export default function CalendarPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [selectedActivity, setSelectedActivity] = useState<ActivityWithProgress | null>(null);
   const { data: activities = [], isLoading } = useActivities();
   const toggleProgress = useToggleActivityProgress();
 
@@ -56,6 +87,14 @@ export default function CalendarPage() {
     toggleProgress.mutate({ activityId: activity.id, isCompleted: activity.is_completed });
   };
 
+  // Calculate summary stats
+  const stats = useMemo(() => {
+    const completed = activities.filter(a => a.is_completed).length;
+    const overdue = activities.filter(a => getActivityStatus(a) === 'overdue').length;
+    const pending = activities.filter(a => getActivityStatus(a) === 'pending').length;
+    return { completed, overdue, pending };
+  }, [activities]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -74,6 +113,49 @@ export default function CalendarPage() {
         <p className="text-muted-foreground">
           Visualize todas as atividades por data de entrega
         </p>
+      </div>
+
+      {/* Status Summary Cards */}
+      <div className="grid grid-cols-3 gap-4">
+        <Card className="border-l-4 border-l-success">
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-success/10 flex items-center justify-center">
+                <CheckCircle2 className="h-5 w-5 text-success" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{stats.completed}</p>
+                <p className="text-sm text-muted-foreground">Concluídas</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-l-4 border-l-warning">
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-warning/10 flex items-center justify-center">
+                <Circle className="h-5 w-5 text-warning" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{stats.pending}</p>
+                <p className="text-sm text-muted-foreground">Pendentes</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-l-4 border-l-destructive">
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-destructive/10 flex items-center justify-center">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{stats.overdue}</p>
+                <p className="text-sm text-muted-foreground">Atrasadas</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <Card>
@@ -117,9 +199,12 @@ export default function CalendarPage() {
 
               const dayActivities = getActivitiesForDate(day);
               const hasActivities = dayActivities.length > 0;
-              const allCompleted = hasActivities && dayActivities.every((a) => a.is_completed);
-              const someOverdue = hasActivities && dayActivities.some((a) => !a.is_completed && isPast(new Date(a.due_date)) && !isToday(new Date(a.due_date)));
               const isSelected = selectedDate && isSameDay(day, selectedDate);
+              
+              // Get dominant status for the day
+              const hasOverdue = dayActivities.some(a => getActivityStatus(a) === 'overdue');
+              const hasPending = dayActivities.some(a => getActivityStatus(a) === 'pending');
+              const allCompleted = hasActivities && dayActivities.every(a => a.is_completed);
 
               return (
                 <button
@@ -141,19 +226,15 @@ export default function CalendarPage() {
                   </span>
                   {hasActivities && (
                     <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
-                      {dayActivities.slice(0, 3).map((activity, i) => (
-                        <div
-                          key={i}
-                          className={`h-1.5 w-1.5 rounded-full ${
-                            activity.is_completed
-                              ? 'bg-success'
-                              : someOverdue
-                              ? 'bg-destructive'
-                              : 'bg-primary'
-                          }`}
-                          style={activity.subject?.color && !activity.is_completed && !someOverdue ? { backgroundColor: activity.subject.color } : {}}
-                        />
-                      ))}
+                      {dayActivities.slice(0, 3).map((activity, i) => {
+                        const status = getActivityStatus(activity);
+                        return (
+                          <div
+                            key={i}
+                            className={`h-2 w-2 rounded-full ${statusConfig[status].dotClass}`}
+                          />
+                        );
+                      })}
                       {dayActivities.length > 3 && (
                         <span className="text-[8px] text-muted-foreground">+{dayActivities.length - 3}</span>
                       )}
@@ -170,8 +251,21 @@ export default function CalendarPage() {
       {selectedDate && (
         <Card>
           <CardHeader>
-            <CardTitle>
-              Atividades - {format(selectedDate, "dd 'de' MMMM", { locale: ptBR })}
+            <CardTitle className="flex items-center justify-between">
+              <span>Atividades - {format(selectedDate, "dd 'de' MMMM", { locale: ptBR })}</span>
+              {selectedDateActivities.length > 0 && (
+                <div className="flex gap-2">
+                  <Badge variant="outline" className="text-success border-success">
+                    {selectedDateActivities.filter(a => a.is_completed).length} concluídas
+                  </Badge>
+                  <Badge variant="outline" className="text-warning border-warning">
+                    {selectedDateActivities.filter(a => getActivityStatus(a) === 'pending').length} pendentes
+                  </Badge>
+                  <Badge variant="outline" className="text-destructive border-destructive">
+                    {selectedDateActivities.filter(a => getActivityStatus(a) === 'overdue').length} atrasadas
+                  </Badge>
+                </div>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -182,19 +276,19 @@ export default function CalendarPage() {
             ) : (
               <div className="space-y-3">
                 {selectedDateActivities.map((activity) => {
-                  const dueDate = new Date(activity.due_date);
-                  const isOverdue = isPast(dueDate) && !isToday(dueDate) && !activity.is_completed;
+                  const status = getActivityStatus(activity);
+                  const config = statusConfig[status];
+                  const StatusIcon = config.icon;
 
                   return (
                     <div
                       key={activity.id}
-                      className={`flex items-center gap-4 p-3 rounded-lg border transition-all ${
-                        activity.is_completed ? 'bg-success/5 border-success/30' : isOverdue ? 'bg-destructive/5 border-destructive/30' : ''
-                      }`}
+                      className={`flex items-center gap-4 p-4 rounded-lg border-2 transition-all ${config.bgClass}`}
                     >
                       <Checkbox
                         checked={activity.is_completed}
                         onCheckedChange={() => handleToggle(activity)}
+                        className="h-5 w-5"
                       />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
@@ -206,7 +300,7 @@ export default function CalendarPage() {
                           )}
                           <Link
                             to={`/subjects/${activity.subject_id}/activities/${activity.id}`}
-                            className="font-medium hover:underline truncate"
+                            className={`font-medium hover:underline truncate ${activity.is_completed ? 'line-through opacity-60' : ''}`}
                           >
                             {activity.title}
                           </Link>
@@ -215,21 +309,14 @@ export default function CalendarPage() {
                           {activity.subject?.name}
                         </p>
                       </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
+                      <div className="flex items-center gap-3 flex-shrink-0">
                         {activity.youtube_url && (
                           <Youtube className="h-4 w-4 text-muted-foreground" />
                         )}
-                        {activity.is_completed ? (
-                          <Badge className="bg-success text-success-foreground">
-                            <CheckCircle2 className="h-3 w-3 mr-1" />
-                            Concluída
-                          </Badge>
-                        ) : isOverdue ? (
-                          <Badge variant="destructive">
-                            <Clock className="h-3 w-3 mr-1" />
-                            Atrasada
-                          </Badge>
-                        ) : null}
+                        <Badge className={config.badgeClass}>
+                          <StatusIcon className="h-3 w-3 mr-1" />
+                          {config.label}
+                        </Badge>
                       </div>
                     </div>
                   );
@@ -243,18 +330,21 @@ export default function CalendarPage() {
       {/* Legend */}
       <Card>
         <CardContent className="py-4">
-          <div className="flex flex-wrap items-center gap-4 text-sm">
+          <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
             <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-primary" />
-              <span>Pendente</span>
+              <div className="h-4 w-4 rounded-full bg-success" />
+              <span className="font-medium">Concluída</span>
+              <span className="text-muted-foreground">- Atividade finalizada</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-success" />
-              <span>Concluída</span>
+              <div className="h-4 w-4 rounded-full bg-warning" />
+              <span className="font-medium">Pendente</span>
+              <span className="text-muted-foreground">- Aguardando entrega</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-destructive" />
-              <span>Atrasada</span>
+              <div className="h-4 w-4 rounded-full bg-destructive" />
+              <span className="font-medium">Atrasada</span>
+              <span className="text-muted-foreground">- Prazo expirado</span>
             </div>
           </div>
         </CardContent>
