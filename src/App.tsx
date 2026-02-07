@@ -15,6 +15,7 @@ import SubjectDetail from "./pages/SubjectDetail";
 import ActivityDetail from "./pages/ActivityDetail";
 import CalendarPage from "./pages/Calendar";
 import AIAssistant from "./pages/AIAssistant";
+import ResetPassword from "./pages/ResetPassword";
 import AdminSubjects from "./pages/AdminSubjects";
 import AdminActivities from "./pages/AdminActivities";
 import NotFound from "./pages/NotFound";
@@ -31,6 +32,7 @@ const App = () => (
           <Routes>
             {/* Public routes */}
             <Route path="/" element={<Index />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             
             {/* Auth route - only for non-authenticated users */}
             <Route element={<PublicOnlyRoute />}>

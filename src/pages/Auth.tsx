@@ -7,7 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { GraduationCap, Loader2, Mail, Lock, User, CheckCircle2, Info } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { GraduationCap, Loader2, Mail, Lock, User, CheckCircle2, Info, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
@@ -26,12 +27,22 @@ const signupSchema = z.object({
   path: ['confirmPassword'],
 });
 
+const forgotPasswordSchema = z.object({
+  email: z.string().email('Email inválido'),
+});
+
 export default function Auth() {
   const navigate = useNavigate();
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, resetPassword } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showEmailVerificationAlert, setShowEmailVerificationAlert] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState('');
+
+  // Forgot password state
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
+  const [forgotPasswordError, setForgotPasswordError] = useState('');
+  const [forgotPasswordSuccess, setForgotPasswordSuccess] = useState(false);
 
   // Login form state
   const [loginEmail, setLoginEmail] = useState('');
@@ -117,6 +128,34 @@ export default function Auth() {
       setSignupPassword('');
       setSignupConfirmPassword('');
     }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotPasswordError('');
+
+    const result = forgotPasswordSchema.safeParse({ email: forgotPasswordEmail });
+    if (!result.success) {
+      setForgotPasswordError(result.error.errors[0].message);
+      return;
+    }
+
+    setIsLoading(true);
+    const { error } = await resetPassword(forgotPasswordEmail);
+    setIsLoading(false);
+
+    if (error) {
+      toast.error('Erro ao enviar email: ' + error.message);
+    } else {
+      setForgotPasswordSuccess(true);
+    }
+  };
+
+  const closeForgotPasswordDialog = () => {
+    setShowForgotPassword(false);
+    setForgotPasswordEmail('');
+    setForgotPasswordError('');
+    setForgotPasswordSuccess(false);
   };
 
   return (
@@ -210,6 +249,17 @@ export default function Auth() {
                       'Entrar'
                     )}
                   </Button>
+
+                  <div className="text-center">
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="text-sm text-muted-foreground hover:text-primary"
+                      onClick={() => setShowForgotPassword(true)}
+                    >
+                      Esqueceu sua senha?
+                    </Button>
+                  </div>
                 </form>
               </TabsContent>
 
@@ -303,6 +353,76 @@ export default function Auth() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Forgot Password Dialog */}
+      <Dialog open={showForgotPassword} onOpenChange={closeForgotPasswordDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5 text-primary" />
+              Recuperar Senha
+            </DialogTitle>
+            <DialogDescription>
+              Digite seu email para receber um link de redefinição de senha.
+            </DialogDescription>
+          </DialogHeader>
+
+          {forgotPasswordSuccess ? (
+            <Alert className="bg-success/10 border-success">
+              <CheckCircle2 className="h-5 w-5 text-success" />
+              <AlertTitle className="text-success font-semibold">Email enviado!</AlertTitle>
+              <AlertDescription className="mt-2 text-sm">
+                <p>Enviamos um link de redefinição para:</p>
+                <p className="font-medium text-success mt-1">{forgotPasswordEmail}</p>
+                <p className="mt-2 text-muted-foreground text-xs">
+                  Verifique sua caixa de entrada e pasta de spam.
+                </p>
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="forgot-email">Email</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="forgot-email"
+                    type="email"
+                    placeholder="seu@email.com"
+                    value={forgotPasswordEmail}
+                    onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                {forgotPasswordError && (
+                  <p className="text-sm text-destructive">{forgotPasswordError}</p>
+                )}
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1"
+                  onClick={closeForgotPasswordDialog}
+                >
+                  Cancelar
+                </Button>
+                <Button type="submit" className="flex-1" disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Enviando...
+                    </>
+                  ) : (
+                    'Enviar Link'
+                  )}
+                </Button>
+              </div>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
