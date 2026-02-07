@@ -1,6 +1,5 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useActivities } from '@/hooks/useActivities';
-import { useSubjects } from '@/hooks/useSubjects';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,7 +12,6 @@ import { ptBR } from 'date-fns/locale';
 export default function Dashboard() {
   const { profile, isAdmin } = useAuth();
   const { data: activities = [] } = useActivities();
-  const { data: subjects = [] } = useSubjects();
 
   const today = new Date();
   const completedActivities = activities.filter((a) => a.is_completed);
@@ -46,18 +44,7 @@ export default function Dashboard() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
-        <Card className="border-l-4 border-l-primary">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
-            <CardTitle className="text-xs sm:text-sm font-medium">Total de Matérias</CardTitle>
-            <BookOpen className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
-          </CardHeader>
-          <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
-            <div className="text-xl sm:text-2xl font-bold">{subjects.length}</div>
-            <p className="text-[10px] sm:text-xs text-muted-foreground">matérias cadastradas</p>
-          </CardContent>
-        </Card>
-
+      <div className="grid gap-3 sm:gap-4 grid-cols-3">
         <Card className="border-l-4 border-l-secondary">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
             <CardTitle className="text-xs sm:text-sm font-medium">Atividades</CardTitle>
