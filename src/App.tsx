@@ -14,6 +14,7 @@ import Subjects from "./pages/Subjects";
 import SubjectDetail from "./pages/SubjectDetail";
 import ActivityDetail from "./pages/ActivityDetail";
 import CalendarPage from "./pages/Calendar";
+import AIAssistant from "./pages/AIAssistant";
 import AdminSubjects from "./pages/AdminSubjects";
 import AdminActivities from "./pages/AdminActivities";
 import NotFound from "./pages/NotFound";
@@ -45,6 +46,7 @@ const App = () => (
                 <Route path="/subjects/:subjectId" element={<SubjectDetail />} />
                 <Route path="/subjects/:subjectId/activities/:activityId" element={<ActivityDetail />} />
                 <Route path="/calendar" element={<CalendarPage />} />
+                <Route path="/ai-assistant" element={<AIAssistant />} />
                 
                 {/* Admin routes */}
                 <Route element={<AdminRoute />}>

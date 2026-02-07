@@ -207,16 +207,20 @@ export default function SchedulePage() {
                       {subject ? (
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <div className="cursor-default">
-                              <p className="font-medium text-xs sm:text-sm truncate">{subject.name}</p>
+                            <Link 
+                              to={`/subjects/${subject.id}`}
+                              className="block cursor-pointer hover:opacity-80 transition-opacity"
+                            >
+                              <p className="font-medium text-xs sm:text-sm truncate hover:underline">{subject.name}</p>
                               {cell?.custom_text && (
                                 <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 truncate">{cell.custom_text}</p>
                               )}
-                            </div>
+                            </Link>
                           </TooltipTrigger>
                           <TooltipContent>
                             <p className="font-medium">{subject.name}</p>
                             {cell?.custom_text && <p className="text-xs text-muted-foreground">{cell.custom_text}</p>}
+                            <p className="text-xs text-primary mt-1">Clique para ver atividades</p>
                           </TooltipContent>
                         </Tooltip>
                       ) : cell?.custom_text ? (
