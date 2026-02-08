@@ -205,12 +205,12 @@ export default function AdminActivities() {
               Nova Atividade
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Nova Atividade</DialogTitle>
             </DialogHeader>
             <FormContent />
-            <DialogFooter className="mt-6">
+            <DialogFooter className="mt-6 sticky bottom-0 bg-background pt-4 border-t">
               <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
                 Cancelar
               </Button>
@@ -336,12 +336,12 @@ export default function AdminActivities() {
           resetForm();
         }
       }}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Editar Atividade</DialogTitle>
           </DialogHeader>
           <FormContent />
-          <DialogFooter className="mt-6">
+          <DialogFooter className="mt-6 sticky bottom-0 bg-background pt-4 border-t">
             <Button variant="outline" onClick={() => setEditingActivity(null)}>
               Cancelar
             </Button>
