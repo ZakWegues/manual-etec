@@ -62,7 +62,15 @@ export default function ActivityDetail() {
   const dueDate = new Date(activity.due_date);
   const isOverdue = isPast(dueDate) && !isToday(dueDate) && !activity.is_completed;
   const isDueToday = isToday(dueDate);
-  const embedUrl = getYouTubeEmbedUrl(activity.youtube_url);
+  
+  // Get all videos: first from the videos array, then fallback to legacy youtube_url
+  const allVideos = activity.videos && activity.videos.length > 0
+    ? activity.videos.map(v => ({ url: v.youtube_url, title: v.title }))
+    : activity.youtube_url
+      ? [{ url: activity.youtube_url, title: null }]
+      : [];
+  
+  const hasVideos = allVideos.length > 0;
 
   return (
     <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
@@ -88,10 +96,10 @@ export default function ActivityDetail() {
                   {activity.subject.name}
                 </Badge>
               )}
-              {activity.youtube_url && (
+              {hasVideos && (
                 <Badge variant="outline" className="gap-1">
                   <Youtube className="h-3 w-3" />
-                  Vídeo disponível
+                  {allVideos.length} vídeo{allVideos.length > 1 ? 's' : ''}
                 </Badge>
               )}
             </div>
@@ -164,33 +172,53 @@ export default function ActivityDetail() {
         </Card>
       )}
 
-      {/* YouTube Video */}
-      {embedUrl && (
+      {/* YouTube Videos */}
+      {hasVideos && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Youtube className="h-5 w-5 text-destructive" />
-              Vídeo da Atividade
+              {allVideos.length > 1 ? `Vídeos da Atividade (${allVideos.length})` : 'Vídeo da Atividade'}
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="youtube-container">
-              <iframe
-                src={embedUrl}
-                title="YouTube video player"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            </div>
-            {activity.youtube_url && (
-              <Button asChild variant="ghost" className="mt-4" size="sm">
-                <a href={activity.youtube_url} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="mr-2 h-4 w-4" />
-                  Abrir no YouTube
-                </a>
-              </Button>
-            )}
+          <CardContent className="space-y-6">
+            {allVideos.map((video, index) => {
+              const embedUrl = getYouTubeEmbedUrl(video.url);
+              if (!embedUrl) return null;
+              
+              return (
+                <div key={index} className="space-y-2">
+                  {video.title && (
+                    <h4 className="font-medium text-sm text-muted-foreground">
+                      {index + 1}. {video.title}
+                    </h4>
+                  )}
+                  {!video.title && allVideos.length > 1 && (
+                    <h4 className="font-medium text-sm text-muted-foreground">
+                      Vídeo {index + 1}
+                    </h4>
+                  )}
+                  <div className="youtube-container">
+                    <iframe
+                      src={embedUrl}
+                      title={video.title || `YouTube video ${index + 1}`}
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                  <Button asChild variant="ghost" size="sm">
+                    <a href={video.url} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="mr-2 h-4 w-4" />
+                      Abrir no YouTube
+                    </a>
+                  </Button>
+                  {index < allVideos.length - 1 && (
+                    <div className="border-b pt-4" />
+                  )}
+                </div>
+              );
+            })}
           </CardContent>
         </Card>
       )}
