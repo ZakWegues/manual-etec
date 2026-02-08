@@ -14,7 +14,8 @@ export function useActivities(subjectId?: string) {
         .from('activities')
         .select(`
           *,
-          subject:subjects(*)
+          subject:subjects(*),
+          videos:activity_videos(*)
         `)
         .order('due_date', { ascending: true });
 
@@ -60,7 +61,8 @@ export function useActivity(id: string | undefined) {
         .from('activities')
         .select(`
           *,
-          subject:subjects(*)
+          subject:subjects(*),
+          videos:activity_videos(*)
         `)
         .eq('id', id)
         .maybeSingle();

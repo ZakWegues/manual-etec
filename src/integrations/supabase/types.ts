@@ -84,6 +84,41 @@ export type Database = {
           },
         ]
       }
+      activity_videos: {
+        Row: {
+          activity_id: string
+          created_at: string
+          id: string
+          position: number
+          title: string | null
+          youtube_url: string
+        }
+        Insert: {
+          activity_id: string
+          created_at?: string
+          id?: string
+          position?: number
+          title?: string | null
+          youtube_url: string
+        }
+        Update: {
+          activity_id?: string
+          created_at?: string
+          id?: string
+          position?: number
+          title?: string | null
+          youtube_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_videos_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feedback: {
         Row: {
           created_at: string

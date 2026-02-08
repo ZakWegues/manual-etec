@@ -35,6 +35,16 @@ export interface Activity {
   created_at: string;
   updated_at: string;
   subject?: Subject;
+  videos?: ActivityVideo[];
+}
+
+export interface ActivityVideo {
+  id: string;
+  activity_id: string;
+  youtube_url: string;
+  title: string | null;
+  position: number;
+  created_at: string;
 }
 
 export interface Schedule {

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useSubjects } from '@/hooks/useSubjects';
 import { useActivities, useCreateActivity, useUpdateActivity, useDeleteActivity } from '@/hooks/useActivities';
+import { useBulkUpdateActivityVideos } from '@/hooks/useActivityVideos';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,6 +15,7 @@ import { Calendar, Edit2, GraduationCap, Loader2, Plus, Trash2, Youtube } from '
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { Activity } from '@/types/database';
+import { ActivityVideoManager } from '@/components/admin/ActivityVideoManager';
 
 export default function AdminActivities() {
   const { data: subjects = [] } = useSubjects();
@@ -21,6 +23,7 @@ export default function AdminActivities() {
   const createActivity = useCreateActivity();
   const updateActivity = useUpdateActivity();
   const deleteActivity = useDeleteActivity();
+  const bulkUpdateVideos = useBulkUpdateActivityVideos();
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
@@ -30,14 +33,14 @@ export default function AdminActivities() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
-  const [youtubeUrl, setYoutubeUrl] = useState('');
+  const [videos, setVideos] = useState<Array<{ youtube_url: string; title: string }>>([]);
 
   const resetForm = () => {
     setSubjectId('');
     setTitle('');
     setDescription('');
     setDueDate('');
-    setYoutubeUrl('');
+    setVideos([]);
   };
 
   const openEditDialog = (activity: Activity) => {
@@ -46,19 +49,31 @@ export default function AdminActivities() {
     setTitle(activity.title);
     setDescription(activity.description || '');
     setDueDate(activity.due_date);
-    setYoutubeUrl(activity.youtube_url || '');
+    setVideos(
+      activity.videos?.map(v => ({ youtube_url: v.youtube_url, title: v.title || '' })) || []
+    );
   };
 
   const handleCreate = () => {
     if (!title.trim() || !subjectId || !dueDate) return;
+    
+    const validVideos = videos.filter(v => v.youtube_url.trim());
+    
     createActivity.mutate({
       subject_id: subjectId,
       title,
       description: description || null,
       due_date: dueDate,
-      youtube_url: youtubeUrl || null,
+      youtube_url: validVideos[0]?.youtube_url || null, // Keep legacy field for compatibility
     }, {
-      onSuccess: () => {
+      onSuccess: (data) => {
+        // Add videos to the new activity
+        if (validVideos.length > 0) {
+          bulkUpdateVideos.mutate({
+            activityId: data.id,
+            videos: validVideos,
+          });
+        }
         setIsCreateOpen(false);
         resetForm();
       },
@@ -67,15 +82,23 @@ export default function AdminActivities() {
 
   const handleUpdate = () => {
     if (!editingActivity || !title.trim() || !subjectId || !dueDate) return;
+    
+    const validVideos = videos.filter(v => v.youtube_url.trim());
+    
     updateActivity.mutate({
       id: editingActivity.id,
       subject_id: subjectId,
       title,
       description: description || null,
       due_date: dueDate,
-      youtube_url: youtubeUrl || null,
+      youtube_url: validVideos[0]?.youtube_url || null, // Keep legacy field for compatibility
     }, {
       onSuccess: () => {
+        // Update videos for this activity
+        bulkUpdateVideos.mutate({
+          activityId: editingActivity.id,
+          videos: validVideos,
+        });
         setEditingActivity(null);
         resetForm();
       },
@@ -155,15 +178,7 @@ export default function AdminActivities() {
           onChange={(e) => setDueDate(e.target.value)}
         />
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="youtube">Link do YouTube (opcional)</Label>
-        <Input
-          id="youtube"
-          value={youtubeUrl}
-          onChange={(e) => setYoutubeUrl(e.target.value)}
-          placeholder="https://youtube.com/watch?v=..."
-        />
-      </div>
+      <ActivityVideoManager videos={videos} onChange={setVideos} />
     </div>
   );
 
@@ -259,8 +274,11 @@ export default function AdminActivities() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="font-medium">{activity.title}</span>
-                          {activity.youtube_url && (
-                            <Youtube className="h-4 w-4 text-muted-foreground" />
+                          {(activity.videos?.length || activity.youtube_url) && (
+                            <Badge variant="secondary" className="text-xs">
+                              <Youtube className="h-3 w-3 mr-1" />
+                              {activity.videos?.length || 1} vídeo(s)
+                            </Badge>
                           )}
                         </div>
                         <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
