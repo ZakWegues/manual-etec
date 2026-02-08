@@ -18,6 +18,7 @@ import AIAssistant from "./pages/AIAssistant";
 import ResetPassword from "./pages/ResetPassword";
 import AdminSubjects from "./pages/AdminSubjects";
 import AdminActivities from "./pages/AdminActivities";
+import AdminFeedback from "./pages/AdminFeedback";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -54,6 +55,7 @@ const App = () => (
                 <Route element={<AdminRoute />}>
                   <Route path="/admin/subjects" element={<AdminSubjects />} />
                   <Route path="/admin/activities" element={<AdminActivities />} />
+                  <Route path="/admin/feedback" element={<AdminFeedback />} />
                 </Route>
               </Route>
             </Route>
