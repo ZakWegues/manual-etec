@@ -1,4 +1,4 @@
-import { Calendar, BookOpen, GraduationCap, LayoutDashboard, LogOut, Settings, Users, Bot } from 'lucide-react';
+import { Calendar, BookOpen, GraduationCap, LayoutDashboard, LogOut, Settings, Users, Bot, MessageSquare } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -29,6 +29,7 @@ const mainNavItems = [
 const adminNavItems = [
   { title: 'Gerenciar Matérias', url: '/admin/subjects', icon: BookOpen },
   { title: 'Gerenciar Atividades', url: '/admin/activities', icon: GraduationCap },
+  { title: 'Feedbacks', url: '/admin/feedback', icon: MessageSquare },
 ];
 
 export function AppSidebar() {
