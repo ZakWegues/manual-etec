@@ -6,11 +6,12 @@ import { ArrowLeft, Bell, Moon, Globe } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useTheme } from 'next-themes';
 
 export default function Settings() {
   const navigate = useNavigate();
+  const { theme, setTheme } = useTheme();
   const [notifications, setNotifications] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
 
   const handleSave = () => {
     toast.success('Configurações salvas com sucesso!');
@@ -65,8 +66,8 @@ export default function Settings() {
               </div>
               <Switch
                 id="darkMode"
-                checked={darkMode}
-                onCheckedChange={setDarkMode}
+                checked={theme === 'dark'}
+                onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
               />
             </div>
 
