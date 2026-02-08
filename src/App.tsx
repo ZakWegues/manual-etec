@@ -16,6 +16,9 @@ import ActivityDetail from "./pages/ActivityDetail";
 import CalendarPage from "./pages/Calendar";
 import AIAssistant from "./pages/AIAssistant";
 import ResetPassword from "./pages/ResetPassword";
+import ChangePassword from "./pages/ChangePassword";
+import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
 import AdminSubjects from "./pages/AdminSubjects";
 import AdminActivities from "./pages/AdminActivities";
 import AdminFeedback from "./pages/AdminFeedback";
@@ -50,6 +53,9 @@ const App = () => (
                 <Route path="/subjects/:subjectId/activities/:activityId" element={<ActivityDetail />} />
                 <Route path="/calendar" element={<CalendarPage />} />
                 <Route path="/ai-assistant" element={<AIAssistant />} />
+                <Route path="/change-password" element={<ChangePassword />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/settings" element={<Settings />} />
                 
                 {/* Admin routes */}
                 <Route element={<AdminRoute />}>
