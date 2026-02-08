@@ -1,9 +1,8 @@
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Plus, Trash2, GripVertical, Youtube } from 'lucide-react';
-
 interface VideoItem {
   youtube_url: string;
   title: string;
@@ -56,60 +55,62 @@ export function ActivityVideoManager({ videos, onChange }: ActivityVideoManagerP
           Nenhum vídeo adicionado. Clique em "Adicionar Vídeo" para começar.
         </p>
       ) : (
-        <div className="space-y-2">
-          {videos.map((video, index) => (
-            <div
-              key={index}
-              className="flex items-start gap-2 p-3 border rounded-lg bg-muted/30"
-            >
-              <div className="flex flex-col gap-1 pt-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6"
-                  onClick={() => moveVideo(index, index - 1)}
-                  disabled={index === 0}
-                >
-                  <GripVertical className="h-4 w-4 rotate-180" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6"
-                  onClick={() => moveVideo(index, index + 1)}
-                  disabled={index === videos.length - 1}
-                >
-                  <GripVertical className="h-4 w-4" />
-                </Button>
-              </div>
-
-              <div className="flex-1 space-y-2">
-                <Input
-                  placeholder="https://youtube.com/watch?v=..."
-                  value={video.youtube_url}
-                  onChange={(e) => updateVideo(index, 'youtube_url', e.target.value)}
-                />
-                <Input
-                  placeholder="Título do vídeo (opcional)"
-                  value={video.title}
-                  onChange={(e) => updateVideo(index, 'title', e.target.value)}
-                />
-              </div>
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="text-destructive hover:text-destructive"
-                onClick={() => removeVideo(index)}
+        <ScrollArea className="max-h-[240px] pr-3">
+          <div className="space-y-2">
+            {videos.map((video, index) => (
+              <div
+                key={index}
+                className="flex items-start gap-2 p-3 border rounded-lg bg-muted/30"
               >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
-        </div>
+                <div className="flex flex-col gap-1 pt-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={() => moveVideo(index, index - 1)}
+                    disabled={index === 0}
+                  >
+                    <GripVertical className="h-4 w-4 rotate-180" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={() => moveVideo(index, index + 1)}
+                    disabled={index === videos.length - 1}
+                  >
+                    <GripVertical className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                <div className="flex-1 space-y-2">
+                  <Input
+                    placeholder="https://youtube.com/watch?v=..."
+                    value={video.youtube_url}
+                    onChange={(e) => updateVideo(index, 'youtube_url', e.target.value)}
+                  />
+                  <Input
+                    placeholder="Título do vídeo (opcional)"
+                    value={video.title}
+                    onChange={(e) => updateVideo(index, 'title', e.target.value)}
+                  />
+                </div>
+
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="text-destructive hover:text-destructive"
+                  onClick={() => removeVideo(index)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
       )}
     </div>
   );
