@@ -21,6 +21,37 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Authentication validation
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      console.error("Missing authorization header");
+      return new Response(
+        JSON.stringify({ error: 'Autenticação necessária' }),
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Create Supabase client with user's token
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
+
+    // Verify the user is authenticated
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !user) {
+      console.error("Authentication failed:", authError?.message);
+      return new Response(
+        JSON.stringify({ error: 'Autenticação inválida' }),
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    console.log("Authenticated user:", user.id);
+
     const { name, email, type, message }: FeedbackRequest = await req.json();
 
     console.log("Received feedback request:", { name, email, type, messageLength: message.length });
@@ -28,14 +59,30 @@ const handler = async (req: Request): Promise<Response> => {
     // Validate required fields
     if (!name || !email || !type || !message) {
       console.error("Missing required fields:", { name: !!name, email: !!email, type: !!type, message: !!message });
-      throw new Error("Todos os campos são obrigatórios");
+      return new Response(
+        JSON.stringify({ error: "Todos os campos são obrigatórios" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
     }
 
-    // Insert feedback into database
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // Validate message length
+    if (message.length > 5000) {
+      return new Response(
+        JSON.stringify({ error: "Mensagem muito longa. Máximo de 5000 caracteres." }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
 
+    // Validate feedback type
+    const validTypes = ['bug', 'suggestion', 'compliment', 'other'];
+    if (!validTypes.includes(type)) {
+      return new Response(
+        JSON.stringify({ error: "Tipo de feedback inválido" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Insert feedback into database using the authenticated client
     const { data, error } = await supabase
       .from('feedback')
       .insert({
@@ -49,7 +96,10 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (error) {
       console.error("Error inserting feedback:", error);
-      throw new Error("Erro ao salvar feedback no banco de dados");
+      return new Response(
+        JSON.stringify({ error: "Erro ao salvar feedback no banco de dados" }),
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
     }
 
     console.log("Feedback saved successfully:", data.id);
