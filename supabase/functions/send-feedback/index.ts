@@ -31,16 +31,21 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Create Supabase client with user's token
+    // Create Supabase client with user's token for auth verification
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    // Client for auth verification (with user token)
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } }
     });
+    
+    // Client for database operations (bypasses RLS after auth is verified)
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
 
     // Verify the user is authenticated
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
     
     if (authError || !user) {
       console.error("Authentication failed:", authError?.message);
@@ -83,7 +88,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Insert feedback into database using the authenticated client
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('feedback')
       .insert({
         name,
