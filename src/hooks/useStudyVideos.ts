@@ -38,6 +38,22 @@ export function useStudyVideos(subjectId?: string) {
     },
   });
 
+  const updateVideo = useMutation({
+    mutationFn: async ({ id, ...updates }: { id: string; title?: string; youtube_url?: string; subject_id?: string; description?: string | null }) => {
+      const { data, error } = await supabase
+        .from('study_videos')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['study-videos'] });
+    },
+  });
+
   const deleteVideo = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from('study_videos').delete().eq('id', id);
@@ -48,5 +64,5 @@ export function useStudyVideos(subjectId?: string) {
     },
   });
 
-  return { videos: videosQuery.data ?? [], isLoading: videosQuery.isLoading, addVideo, deleteVideo };
+  return { videos: videosQuery.data ?? [], isLoading: videosQuery.isLoading, addVideo, updateVideo, deleteVideo };
 }
