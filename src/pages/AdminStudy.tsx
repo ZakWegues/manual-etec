@@ -8,79 +8,101 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Trash2, Plus, Pencil } from 'lucide-react';
+import { Trash2, Plus, Pencil, GripVertical, Youtube, BookOpen } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 import type { StudyVideo } from '@/types/database';
+
+interface VideoFormItem {
+  id?: string;
+  title: string;
+  youtube_url: string;
+  description: string;
+}
 
 export default function AdminStudy() {
   const { data: subjects = [] } = useSubjects();
-  const { videos, isLoading, addVideo, updateVideo, deleteVideo } = useStudyVideos();
+  const { videos, isLoading } = useStudyVideos();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const [title, setTitle] = useState('');
-  const [youtubeUrl, setYoutubeUrl] = useState('');
-  const [subjectId, setSubjectId] = useState('');
-  const [description, setDescription] = useState('');
+  const [selectedSubject, setSelectedSubject] = useState<string>('');
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [videoItems, setVideoItems] = useState<VideoFormItem[]>([]);
   const [filterSubject, setFilterSubject] = useState('all');
 
-  const [editingVideo, setEditingVideo] = useState<StudyVideo | null>(null);
-  const [editTitle, setEditTitle] = useState('');
-  const [editYoutubeUrl, setEditYoutubeUrl] = useState('');
-  const [editSubjectId, setEditSubjectId] = useState('');
-  const [editDescription, setEditDescription] = useState('');
+  const openSubjectDialog = (subjectId: string) => {
+    const subjectVideos = videos.filter((v) => v.subject_id === subjectId);
+    setSelectedSubject(subjectId);
+    setVideoItems(
+      subjectVideos.length > 0
+        ? subjectVideos.map((v) => ({ id: v.id, title: v.title, youtube_url: v.youtube_url, description: v.description || '' }))
+        : [{ title: '', youtube_url: '', description: '' }]
+    );
+    setDialogOpen(true);
+  };
 
-  const handleAdd = async () => {
-    if (!title || !youtubeUrl || !subjectId) {
-      toast({ title: 'Preencha todos os campos obrigatórios', variant: 'destructive' });
+  const addVideoItem = () => {
+    setVideoItems([...videoItems, { title: '', youtube_url: '', description: '' }]);
+  };
+
+  const removeVideoItem = (index: number) => {
+    setVideoItems(videoItems.filter((_, i) => i !== index));
+  };
+
+  const updateVideoItem = (index: number, field: keyof VideoFormItem, value: string) => {
+    setVideoItems(videoItems.map((v, i) => (i === index ? { ...v, [field]: value } : v)));
+  };
+
+  const moveVideo = (from: number, to: number) => {
+    if (to < 0 || to >= videoItems.length) return;
+    const updated = [...videoItems];
+    const [moved] = updated.splice(from, 1);
+    updated.splice(to, 0, moved);
+    setVideoItems(updated);
+  };
+
+  const handleSave = async () => {
+    const valid = videoItems.filter((v) => v.title && v.youtube_url);
+    if (valid.length === 0) {
+      toast({ title: 'Adicione pelo menos um vídeo com título e URL', variant: 'destructive' });
       return;
     }
+
+    setSaving(true);
     try {
-      await addVideo.mutateAsync({ title, youtube_url: youtubeUrl, subject_id: subjectId, description: description || undefined });
-      toast({ title: 'Vídeo adicionado com sucesso!' });
-      setTitle('');
-      setYoutubeUrl('');
-      setDescription('');
+      // Delete existing videos for this subject
+      const existingIds = videos.filter((v) => v.subject_id === selectedSubject).map((v) => v.id);
+      if (existingIds.length > 0) {
+        const { error: delError } = await supabase.from('study_videos').delete().in('id', existingIds);
+        if (delError) throw delError;
+      }
+
+      // Insert all videos with position
+      const inserts = valid.map((v, i) => ({
+        subject_id: selectedSubject,
+        title: v.title,
+        youtube_url: v.youtube_url,
+        description: v.description || null,
+        position: i,
+      }));
+
+      const { error: insError } = await supabase.from('study_videos').insert(inserts);
+      if (insError) throw insError;
+
+      queryClient.invalidateQueries({ queryKey: ['study-videos'] });
+      toast({ title: 'Vídeos salvos com sucesso!' });
+      setDialogOpen(false);
     } catch {
-      toast({ title: 'Erro ao adicionar vídeo', variant: 'destructive' });
+      toast({ title: 'Erro ao salvar vídeos', variant: 'destructive' });
+    } finally {
+      setSaving(false);
     }
   };
 
-  const openEdit = (video: StudyVideo) => {
-    setEditingVideo(video);
-    setEditTitle(video.title);
-    setEditYoutubeUrl(video.youtube_url);
-    setEditSubjectId(video.subject_id);
-    setEditDescription(video.description || '');
-  };
-
-  const handleUpdate = async () => {
-    if (!editingVideo || !editTitle || !editYoutubeUrl || !editSubjectId) {
-      toast({ title: 'Preencha todos os campos obrigatórios', variant: 'destructive' });
-      return;
-    }
-    try {
-      await updateVideo.mutateAsync({
-        id: editingVideo.id,
-        title: editTitle,
-        youtube_url: editYoutubeUrl,
-        subject_id: editSubjectId,
-        description: editDescription || null,
-      });
-      toast({ title: 'Vídeo atualizado com sucesso!' });
-      setEditingVideo(null);
-    } catch {
-      toast({ title: 'Erro ao atualizar vídeo', variant: 'destructive' });
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    try {
-      await deleteVideo.mutateAsync(id);
-      toast({ title: 'Vídeo removido!' });
-    } catch {
-      toast({ title: 'Erro ao remover vídeo', variant: 'destructive' });
-    }
-  };
+  const getVideoCount = (subjectId: string) => videos.filter((v) => v.subject_id === subjectId).length;
 
   const filtered = filterSubject === 'all' ? videos : videos.filter((v) => v.subject_id === filterSubject);
 
@@ -88,45 +110,38 @@ export default function AdminStudy() {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Gerenciar Estudo</h1>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2"><Plus className="h-5 w-5" /> Adicionar Vídeo</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label>Título *</Label>
-              <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Título do vídeo" />
-            </div>
-            <div className="space-y-2">
-              <Label>Matéria *</Label>
-              <Select value={subjectId} onValueChange={setSubjectId}>
-                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                <SelectContent>
-                  {subjects.map((s) => (
-                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label>URL do YouTube *</Label>
-            <Input value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} placeholder="https://youtube.com/watch?v=..." />
-          </div>
-          <div className="space-y-2">
-            <Label>Descrição</Label>
-            <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Descrição opcional" />
-          </div>
-          <Button onClick={handleAdd} disabled={addVideo.isPending}>
-            {addVideo.isPending ? 'Adicionando...' : 'Adicionar Vídeo'}
-          </Button>
-        </CardContent>
-      </Card>
+      {/* Subject cards grid */}
+      <div>
+        <h2 className="text-lg font-semibold mb-3">Matérias</h2>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {subjects.map((subject) => {
+            const count = getVideoCount(subject.id);
+            return (
+              <Card
+                key={subject.id}
+                className="cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => openSubjectDialog(subject.id)}
+              >
+                <CardContent className="flex items-center justify-between p-4">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="h-3 w-3 rounded-full shrink-0" style={{ backgroundColor: subject.color }} />
+                    <div className="min-w-0">
+                      <p className="font-medium truncate">{subject.name}</p>
+                      <p className="text-xs text-muted-foreground">{count} {count === 1 ? 'vídeo' : 'vídeos'}</p>
+                    </div>
+                  </div>
+                  <Pencil className="h-4 w-4 text-muted-foreground shrink-0" />
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      </div>
 
+      {/* All videos list */}
       <div className="space-y-4">
         <div className="flex items-center gap-4">
-          <h2 className="text-lg font-semibold">Vídeos cadastrados</h2>
+          <h2 className="text-lg font-semibold">Todos os vídeos</h2>
           <Select value={filterSubject} onValueChange={setFilterSubject}>
             <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -151,16 +166,10 @@ export default function AdminStudy() {
                   <div className="min-w-0 flex-1">
                     <p className="font-medium">{video.title}</p>
                     <p className="text-xs text-muted-foreground">{subject?.name}</p>
-                    {video.description && <p className="text-xs text-muted-foreground truncate">{video.description}</p>}
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" onClick={() => openEdit(video)}>
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(video.id)}>
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </div>
+                  <Button variant="ghost" size="icon" onClick={() => openSubjectDialog(video.subject_id)}>
+                    <Pencil className="h-4 w-4" />
+                  </Button>
                 </div>
               );
             })}
@@ -168,42 +177,56 @@ export default function AdminStudy() {
         )}
       </div>
 
-      <Dialog open={!!editingVideo} onOpenChange={(open) => !open && setEditingVideo(null)}>
-        <DialogContent>
+      {/* Multi-video dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
           <DialogHeader>
-            <DialogTitle>Editar Vídeo</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <BookOpen className="h-5 w-5" />
+              Vídeos — {subjects.find((s) => s.id === selectedSubject)?.name}
+            </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Título *</Label>
-              <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Matéria *</Label>
-              <Select value={editSubjectId} onValueChange={setEditSubjectId}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {subjects.map((s) => (
-                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>URL do YouTube *</Label>
-              <Input value={editYoutubeUrl} onChange={(e) => setEditYoutubeUrl(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Descrição</Label>
-              <Textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} />
+
+          <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+            {videoItems.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-6 border border-dashed rounded-lg">
+                Nenhum vídeo. Clique em "Adicionar Vídeo" para começar.
+              </p>
+            ) : (
+              videoItems.map((video, index) => (
+                <div key={index} className="flex items-start gap-2 p-3 border rounded-lg bg-muted/30">
+                  <div className="flex flex-col gap-1 pt-2">
+                    <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => moveVideo(index, index - 1)} disabled={index === 0}>
+                      <GripVertical className="h-4 w-4 rotate-180" />
+                    </Button>
+                    <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => moveVideo(index, index + 1)} disabled={index === videoItems.length - 1}>
+                      <GripVertical className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <Input placeholder="Título do vídeo *" value={video.title} onChange={(e) => updateVideoItem(index, 'title', e.target.value)} />
+                    <Input placeholder="https://youtube.com/watch?v=..." value={video.youtube_url} onChange={(e) => updateVideoItem(index, 'youtube_url', e.target.value)} />
+                    <Textarea placeholder="Descrição (opcional)" value={video.description} onChange={(e) => updateVideoItem(index, 'description', e.target.value)} className="min-h-[60px]" />
+                  </div>
+                  <Button type="button" variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => removeVideoItem(index)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="flex items-center justify-between pt-3 border-t sticky bottom-0 bg-background">
+            <Button type="button" variant="outline" size="sm" onClick={addVideoItem}>
+              <Plus className="h-4 w-4 mr-1" /> Adicionar Vídeo
+            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
+              <Button onClick={handleSave} disabled={saving}>
+                {saving ? 'Salvando...' : 'Salvar'}
+              </Button>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditingVideo(null)}>Cancelar</Button>
-            <Button onClick={handleUpdate} disabled={updateVideo.isPending}>
-              {updateVideo.isPending ? 'Salvando...' : 'Salvar'}
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
