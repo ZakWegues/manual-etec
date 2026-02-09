@@ -65,6 +65,17 @@ export interface ActivityProgress {
   completed_at: string;
 }
 
+export interface StudyVideo {
+  id: string;
+  subject_id: string;
+  title: string;
+  youtube_url: string;
+  description: string | null;
+  position: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface ActivityWithProgress extends Activity {
   is_completed: boolean;
 }
