@@ -2,14 +2,14 @@ import { useSubjects } from '@/hooks/useSubjects';
 import { useStudyVideos } from '@/hooks/useStudyVideos';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { PlayCircle, ChevronRight, Loader2 } from 'lucide-react';
+import { PlayCircle, ChevronRight, Loader2, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function Study() {
   const { data: subjects = [], isLoading: loadingSubjects } = useSubjects();
   const { videos, isLoading: loadingVideos } = useStudyVideos();
 
-  const getVideoCount = (subjectId: string) =>
+  const getContentCount = (subjectId: string) =>
     videos.filter((v) => v.subject_id === subjectId).length;
 
   if (loadingSubjects || loadingVideos) {
@@ -20,7 +20,7 @@ export default function Study() {
     );
   }
 
-  const subjectsWithVideos = subjects.filter((s) => getVideoCount(s.id) > 0);
+  const subjectsWithVideos = subjects.filter((s) => getContentCount(s.id) > 0);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -30,7 +30,7 @@ export default function Study() {
           Estudo
         </h1>
         <p className="text-muted-foreground">
-          Selecione uma matéria para acessar os vídeos de estudo
+          Selecione uma matéria para acessar os conteúdos de estudo
         </p>
       </div>
 
@@ -38,16 +38,16 @@ export default function Study() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <PlayCircle className="h-12 w-12 text-muted-foreground/50 mb-4" />
-            <p className="text-lg font-medium text-muted-foreground">Nenhum vídeo de estudo disponível</p>
+            <p className="text-lg font-medium text-muted-foreground">Nenhum conteúdo de estudo disponível</p>
             <p className="text-sm text-muted-foreground/70">
-              Aguarde o administrador adicionar vídeos de estudo
+              Aguarde o administrador adicionar conteúdos de estudo
             </p>
           </CardContent>
         </Card>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {subjectsWithVideos.map((subject) => {
-            const count = getVideoCount(subject.id);
+            const count = getContentCount(subject.id);
 
             return (
               <Link key={subject.id} to={`/study/${subject.id}`}>
@@ -74,7 +74,7 @@ export default function Study() {
                   </CardHeader>
                   <CardContent>
                     <Badge variant="secondary">
-                      {count} {count === 1 ? 'vídeo' : 'vídeos'}
+                      {count} {count === 1 ? 'conteúdo' : 'conteúdos'}
                     </Badge>
                   </CardContent>
                 </Card>
