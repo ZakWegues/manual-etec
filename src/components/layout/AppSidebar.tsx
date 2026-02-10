@@ -21,7 +21,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 
 const mainNavItems = [
@@ -138,6 +138,7 @@ export function AppSidebar() {
               collapsed && 'justify-center'
             )}>
               <Avatar className="h-9 w-9 border-2 border-sidebar-accent">
+                <AvatarImage src={profile?.avatar_url || undefined} alt="Avatar" />
                 <AvatarFallback className="bg-sidebar-accent text-sidebar-accent-foreground text-sm">
                   {getInitials(profile?.full_name)}
                 </AvatarFallback>
