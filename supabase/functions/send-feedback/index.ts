@@ -70,6 +70,39 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    // Validate field types
+    if (typeof name !== 'string' || typeof email !== 'string' || typeof type !== 'string' || typeof message !== 'string') {
+      return new Response(
+        JSON.stringify({ error: "Dados inválidos" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return new Response(
+        JSON.stringify({ error: "Formato de email inválido" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Validate name length
+    if (name.length > 200) {
+      return new Response(
+        JSON.stringify({ error: "Nome muito longo. Máximo de 200 caracteres." }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Validate email length
+    if (email.length > 255) {
+      return new Response(
+        JSON.stringify({ error: "Email muito longo. Máximo de 255 caracteres." }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
     // Validate message length
     if (message.length > 5000) {
       return new Response(
@@ -119,7 +152,7 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("Error in send-feedback function:", error);
     return new Response(
-      JSON.stringify({ error: error.message || "Erro ao enviar feedback" }),
+      JSON.stringify({ error: "Erro ao enviar feedback" }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
