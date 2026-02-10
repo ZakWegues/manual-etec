@@ -45,6 +45,8 @@ export interface ActivityVideo {
   title: string | null;
   position: number;
   created_at: string;
+  type: string;
+  file_url: string | null;
 }
 
 export interface Schedule {
@@ -74,6 +76,8 @@ export interface StudyVideo {
   position: number;
   created_at: string;
   updated_at: string;
+  type: string;
+  file_url: string | null;
 }
 
 export interface ActivityWithProgress extends Activity {

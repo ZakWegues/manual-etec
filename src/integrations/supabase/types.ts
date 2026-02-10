@@ -88,25 +88,31 @@ export type Database = {
         Row: {
           activity_id: string
           created_at: string
+          file_url: string | null
           id: string
           position: number
           title: string | null
+          type: string
           youtube_url: string
         }
         Insert: {
           activity_id: string
           created_at?: string
+          file_url?: string | null
           id?: string
           position?: number
           title?: string | null
+          type?: string
           youtube_url: string
         }
         Update: {
           activity_id?: string
           created_at?: string
+          file_url?: string | null
           id?: string
           position?: number
           title?: string | null
+          type?: string
           youtube_url?: string
         }
         Relationships: [
@@ -218,30 +224,36 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          file_url: string | null
           id: string
           position: number
           subject_id: string
           title: string
+          type: string
           updated_at: string
           youtube_url: string
         }
         Insert: {
           created_at?: string
           description?: string | null
+          file_url?: string | null
           id?: string
           position?: number
           subject_id: string
           title: string
+          type?: string
           updated_at?: string
           youtube_url: string
         }
         Update: {
           created_at?: string
           description?: string | null
+          file_url?: string | null
           id?: string
           position?: number
           subject_id?: string
           title?: string
+          type?: string
           updated_at?: string
           youtube_url?: string
         }

@@ -80,7 +80,7 @@ export function useBulkUpdateActivityVideos() {
       videos 
     }: { 
       activityId: string; 
-      videos: Array<{ youtube_url: string; title?: string }>;
+      videos: Array<{ youtube_url: string; title?: string; type?: string; file_url?: string }>;
     }) => {
       // Delete existing videos for this activity
       const { error: deleteError } = await supabase
@@ -94,9 +94,11 @@ export function useBulkUpdateActivityVideos() {
       if (videos.length > 0) {
         const videosToInsert = videos.map((video, index) => ({
           activity_id: activityId,
-          youtube_url: video.youtube_url,
+          youtube_url: video.youtube_url || '',
           title: video.title || null,
           position: index,
+          type: video.type || 'video',
+          file_url: video.file_url || null,
         }));
 
         const { error: insertError } = await supabase

@@ -3,7 +3,7 @@ import { useSubjects } from '@/hooks/useSubjects';
 import { useStudyVideos } from '@/hooks/useStudyVideos';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowLeft, PlayCircle } from 'lucide-react';
+import { ArrowLeft, PlayCircle, FileText, ExternalLink } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 function getYouTubeId(url: string) {
@@ -42,10 +42,35 @@ export default function StudySubject() {
       <h1 className="text-2xl font-bold">{subject?.name || 'Matéria'} — Estudo</h1>
 
       {videos.length === 0 ? (
-        <p className="text-muted-foreground py-8 text-center">Nenhum vídeo disponível para esta matéria.</p>
+        <p className="text-muted-foreground py-8 text-center">Nenhum conteúdo disponível para esta matéria.</p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
           {videos.map((video) => {
+            const isPdf = (video as any).type === 'pdf';
+            const fileUrl = (video as any).file_url;
+
+            if (isPdf && fileUrl) {
+              return (
+                <Card key={video.id} className="overflow-hidden">
+                  <div className="aspect-video bg-muted flex items-center justify-center">
+                    <FileText className="h-16 w-16 text-primary/50" />
+                  </div>
+                  <CardContent className="p-4">
+                    <h3 className="font-semibold">{video.title}</h3>
+                    {(video as any).description && (
+                      <p className="mt-1 text-sm text-muted-foreground">{(video as any).description}</p>
+                    )}
+                    <Button asChild variant="outline" size="sm" className="mt-2">
+                      <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="mr-2 h-4 w-4" />
+                        Abrir PDF
+                      </a>
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            }
+
             const ytId = getYouTubeId(video.youtube_url);
             return (
               <Card key={video.id} className="overflow-hidden">
@@ -66,8 +91,8 @@ export default function StudySubject() {
                 )}
                 <CardContent className="p-4">
                   <h3 className="font-semibold">{video.title}</h3>
-                  {video.description && (
-                    <p className="mt-1 text-sm text-muted-foreground">{video.description}</p>
+                  {(video as any).description && (
+                    <p className="mt-1 text-sm text-muted-foreground">{(video as any).description}</p>
                   )}
                 </CardContent>
               </Card>
