@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, GraduationCap, PlayCircle, Search } from 'lucide-react';
-import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface SearchResult {
   id: string;
@@ -17,6 +19,7 @@ export function GlobalSearch() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,18 +33,18 @@ export function GlobalSearch() {
     return () => document.removeEventListener('keydown', down);
   }, []);
 
-  useEffect(() => {
-    if (!query || query.length < 2) {
+  const doSearch = async (term: string) => {
+    if (!term || term.length < 2) {
       setResults([]);
       return;
     }
-
-    const search = async () => {
-      const term = `%${query}%`;
+    setLoading(true);
+    try {
+      const likeTerm = `%${term}%`;
       const [subjects, activities, videos] = await Promise.all([
-        supabase.from('subjects').select('id, name, description').ilike('name', term).limit(5),
-        supabase.from('activities').select('id, title, subject_id').ilike('title', term).limit(5),
-        supabase.from('study_videos').select('id, title, subject_id').ilike('title', term).limit(5),
+        supabase.from('subjects').select('id, name, description').ilike('name', likeTerm).limit(5),
+        supabase.from('activities').select('id, title, subject_id').ilike('title', likeTerm).limit(5),
+        supabase.from('study_videos').select('id, title, subject_id').ilike('title', likeTerm).limit(5),
       ]);
 
       const r: SearchResult[] = [];
@@ -55,15 +58,20 @@ export function GlobalSearch() {
         r.push({ id: v.id, title: v.title, url: `/study/${v.subject_id}`, type: 'study' })
       );
       setResults(r);
-    };
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const timeout = setTimeout(search, 300);
+  useEffect(() => {
+    const timeout = setTimeout(() => doSearch(query), 300);
     return () => clearTimeout(timeout);
   }, [query]);
 
   const handleSelect = (url: string) => {
     setOpen(false);
     setQuery('');
+    setResults([]);
     navigate(url);
   };
 
@@ -98,30 +106,64 @@ export function GlobalSearch() {
         </kbd>
       </Button>
 
-      <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput placeholder="Buscar matérias, atividades, conteúdos..." value={query} onValueChange={setQuery} />
-        <CommandList>
-          <CommandEmpty>Nenhum resultado encontrado.</CommandEmpty>
-          {Object.entries(grouped).map(([type, items]) => {
-            const Icon = icons[type as keyof typeof icons];
-            return (
-              <CommandGroup key={type} heading={labels[type as keyof typeof labels]}>
-                {items.map((item) => (
-                  <CommandItem key={item.id} onSelect={() => handleSelect(item.url)}>
-                    <Icon className="mr-2 h-4 w-4 text-muted-foreground" />
-                    <div>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="overflow-hidden p-0 gap-0 max-w-lg">
+          <div className="flex items-center border-b px-3 gap-2">
+            <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <Input
+              placeholder="Buscar matérias, atividades, conteúdos..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-12"
+              autoFocus
+            />
+            <Button
+              size="sm"
+              className="shrink-0 gap-1.5"
+              onClick={() => doSearch(query)}
+            >
+              <Search className="h-3.5 w-3.5" />
+              Buscar
+            </Button>
+          </div>
+
+          <ScrollArea className="max-h-[300px]">
+            {query.length >= 2 && results.length === 0 && !loading && (
+              <p className="py-6 text-center text-sm text-muted-foreground">
+                Nenhum resultado encontrado.
+              </p>
+            )}
+            {query.length < 2 && (
+              <p className="py-6 text-center text-sm text-muted-foreground">
+                Digite pelo menos 2 caracteres para buscar.
+              </p>
+            )}
+            {Object.entries(grouped).map(([type, items]) => {
+              const Icon = icons[type as keyof typeof icons];
+              return (
+                <div key={type} className="p-1">
+                  <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
+                    {labels[type as keyof typeof labels]}
+                  </p>
+                  {items.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => handleSelect(item.url)}
+                      className="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors"
+                    >
+                      <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
                       <span>{item.title}</span>
                       {item.subtitle && (
-                        <span className="ml-2 text-xs text-muted-foreground">{item.subtitle}</span>
+                        <span className="ml-1 text-xs text-muted-foreground truncate">{item.subtitle}</span>
                       )}
-                    </div>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            );
-          })}
-        </CommandList>
-      </CommandDialog>
+                    </button>
+                  ))}
+                </div>
+              );
+            })}
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

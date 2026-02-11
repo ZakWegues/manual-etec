@@ -1,51 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { GraduationCap, BookOpen, Calendar, CheckCircle2, ArrowRight, Users, Sparkles, Clock, Star, Zap, Target, Shield } from 'lucide-react';
+import { GraduationCap, BookOpen, Calendar, CheckCircle2, ArrowRight, Users, Sparkles, Clock, Zap, Target, Shield } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-
-function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: string }) {
-  const [count, setCount] = useState(0);
-  const ref = useRef<HTMLDivElement>(null);
-  const [started, setStarted] = useState(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !started) {
-          setStarted(true);
-        }
-      },
-      { threshold: 0.5 }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [started]);
-
-  useEffect(() => {
-    if (!started) return;
-    const duration = 1500;
-    const steps = 40;
-    const increment = target / steps;
-    let current = 0;
-    const timer = setInterval(() => {
-      current += increment;
-      if (current >= target) {
-        setCount(target);
-        clearInterval(timer);
-      } else {
-        setCount(Math.floor(current));
-      }
-    }, duration / steps);
-    return () => clearInterval(timer);
-  }, [started, target]);
-
-  return (
-    <div ref={ref} className="text-4xl md:text-5xl font-bold text-primary">
-      {count}
-      {suffix}
-    </div>
-  );
-}
 
 function ScrollReveal({ children, className = '', delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -133,25 +89,6 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="py-16 border-b">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            {[
-              { target: 100, suffix: '+', label: 'Alunos ativos' },
-              { target: 50, suffix: '+', label: 'Atividades' },
-              { target: 15, suffix: '+', label: 'Matérias' },
-              { target: 200, suffix: '+', label: 'Vídeos e PDFs' },
-            ].map((stat) => (
-              <div key={stat.label}>
-                <AnimatedCounter target={stat.target} suffix={stat.suffix} />
-                <p className="mt-2 text-sm text-muted-foreground">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Features */}
       <section className="py-20 md:py-28">
         <div className="container mx-auto px-4">
@@ -213,40 +150,6 @@ export default function Index() {
                   </div>
                   <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
                   <p className="text-muted-foreground">{item.desc}</p>
-                </div>
-              </ScrollReveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="py-20 md:py-28">
-        <div className="container mx-auto px-4">
-          <ScrollReveal>
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">O que os alunos dizem</h2>
-              <p className="text-muted-foreground text-lg">Depoimentos de quem já usa a plataforma</p>
-            </div>
-          </ScrollReveal>
-          <div className="grid gap-6 md:grid-cols-3 max-w-5xl mx-auto">
-            {[
-              { name: 'Maria S.', role: 'Aluna do 2° ano', text: 'Nunca mais perdi um prazo de atividade. A plataforma é super intuitiva e me ajuda a organizar tudo!', stars: 5 },
-              { name: 'João P.', role: 'Aluno do 3° ano', text: 'Os vídeos e PDFs de cada matéria são muito úteis. Consigo estudar para as provas de forma muito mais eficiente.', stars: 5 },
-              { name: 'Ana L.', role: 'Aluna do 1° ano', text: 'O cronograma semanal me salva toda semana. Recomendo para todos os alunos da ETEC!', stars: 5 },
-            ].map((t, i) => (
-              <ScrollReveal key={t.name} delay={i * 100}>
-                <div className="p-6 rounded-2xl bg-card border shadow-sm h-full flex flex-col">
-                  <div className="flex gap-1 mb-4">
-                    {Array.from({ length: t.stars }).map((_, j) => (
-                      <Star key={j} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </div>
-                  <p className="text-muted-foreground flex-1 mb-4">"{t.text}"</p>
-                  <div>
-                    <p className="font-semibold">{t.name}</p>
-                    <p className="text-sm text-muted-foreground">{t.role}</p>
-                  </div>
                 </div>
               </ScrollReveal>
             ))}
