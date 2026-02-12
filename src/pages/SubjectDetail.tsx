@@ -1,6 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { useSubject } from '@/hooks/useSubjects';
 import { useActivities, useToggleActivityProgress } from '@/hooks/useActivities';
+import { SharedMaterials } from '@/components/SharedMaterials';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -171,6 +172,9 @@ export default function SubjectDetail() {
           </div>
         )}
       </div>
+
+      {/* Shared Materials */}
+      {subjectId && <SharedMaterials subjectId={subjectId} />}
     </div>
   );
 }

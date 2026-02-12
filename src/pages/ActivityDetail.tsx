@@ -1,5 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { useActivity, useToggleActivityProgress } from '@/hooks/useActivities';
+import { ActivityComments } from '@/components/ActivityComments';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -238,6 +239,9 @@ export default function ActivityDetail() {
           </CardContent>
         </Card>
       )}
+
+      {/* Comments */}
+      <ActivityComments activityId={activity.id} />
     </div>
   );
 }
