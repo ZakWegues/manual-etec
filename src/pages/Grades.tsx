@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useGrades, useCreateGrade, useDeleteGrade } from '@/hooks/useGrades';
 import { useSubjects } from '@/hooks/useSubjects';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,9 +9,36 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { GraduationCap, Loader2, Plus, Trash2 } from 'lucide-react';
 import { EmptyState } from '@/components/EmptyState';
+import { cn } from '@/lib/utils';
+
+// Concept system: I (1), R (2), B (3), MB (4)
+const CONCEPTS = [
+  { value: 1, label: 'I', full: 'Insuficiente', color: 'bg-destructive text-destructive-foreground' },
+  { value: 2, label: 'R', full: 'Regular', color: 'bg-warning text-warning-foreground' },
+  { value: 3, label: 'B', full: 'Bom', color: 'bg-secondary text-secondary-foreground' },
+  { value: 4, label: 'MB', full: 'Muito Bom', color: 'bg-success text-success-foreground' },
+] as const;
+
+function getConceptFromValue(value: number) {
+  return CONCEPTS.find(c => c.value === value) || CONCEPTS[0];
+}
+
+function getMostFrequentConcept(grades: number[]): typeof CONCEPTS[number] {
+  if (grades.length === 0) return CONCEPTS[0];
+  const counts = new Map<number, number>();
+  grades.forEach(g => counts.set(g, (counts.get(g) || 0) + 1));
+  let maxCount = 0;
+  let maxValue = 1;
+  counts.forEach((count, value) => {
+    if (count > maxCount || (count === maxCount && value > maxValue)) {
+      maxCount = count;
+      maxValue = value;
+    }
+  });
+  return getConceptFromValue(maxValue);
+}
 
 export default function Grades() {
   const { data: grades = [], isLoading } = useGrades();
@@ -22,51 +49,35 @@ export default function Grades() {
   const [isOpen, setIsOpen] = useState(false);
   const [subjectId, setSubjectId] = useState('');
   const [title, setTitle] = useState('');
-  const [grade, setGrade] = useState('');
-  const [maxGrade, setMaxGrade] = useState('10');
+  const [gradeValue, setGradeValue] = useState('');
 
   const resetForm = () => {
     setSubjectId('');
     setTitle('');
-    setGrade('');
-    setMaxGrade('10');
+    setGradeValue('');
   };
 
   const handleCreate = () => {
-    if (!subjectId || !title.trim() || !grade) return;
+    if (!subjectId || !title.trim() || !gradeValue) return;
     createGrade.mutate(
-      { subject_id: subjectId, title, grade: parseFloat(grade), max_grade: parseFloat(maxGrade) || 10 },
+      { subject_id: subjectId, title, grade: parseInt(gradeValue), max_grade: 4 },
       { onSuccess: () => { setIsOpen(false); resetForm(); } }
     );
   };
 
-  // Group grades by subject and compute averages
+  // Group grades by subject
   const subjectStats = useMemo(() => {
-    const map = new Map<string, { name: string; color: string; grades: { title: string; grade: number; max_grade: number }[]; avg: number }>();
+    const map = new Map<string, { name: string; color: string; grades: number[]; dominant: typeof CONCEPTS[number] }>();
     grades.forEach(g => {
       const name = g.subject?.name || 'Sem matéria';
       const color = g.subject?.color || '#94a3b8';
-      if (!map.has(name)) map.set(name, { name, color, grades: [], avg: 0 });
-      map.get(name)!.grades.push({ title: g.title, grade: g.grade, max_grade: g.max_grade });
+      if (!map.has(name)) map.set(name, { name, color, grades: [], dominant: CONCEPTS[0] });
+      map.get(name)!.grades.push(g.grade);
     });
     map.forEach(v => {
-      const total = v.grades.reduce((s, g) => s + (g.grade / g.max_grade) * 10, 0);
-      v.avg = v.grades.length > 0 ? total / v.grades.length : 0;
+      v.dominant = getMostFrequentConcept(v.grades);
     });
     return Array.from(map.values());
-  }, [grades]);
-
-  // Chart data: grades over time per subject
-  const chartData = useMemo(() => {
-    const subjectNames = [...new Set(grades.map(g => g.subject?.name || 'Sem matéria'))];
-    return grades
-      .slice()
-      .reverse()
-      .map((g, i) => {
-        const entry: Record<string, any> = { name: g.title };
-        if (g.subject?.name) entry[g.subject.name] = (g.grade / g.max_grade) * 10;
-        return entry;
-      });
   }, [grades]);
 
   if (isLoading) {
@@ -85,14 +96,14 @@ export default function Grades() {
             <GraduationCap className="h-8 w-8 text-primary" />
             Minhas Notas
           </h1>
-          <p className="text-muted-foreground mt-1">Registre e acompanhe suas notas por matéria</p>
+          <p className="text-muted-foreground mt-1">Registre e acompanhe seus conceitos por matéria</p>
         </div>
         <Dialog open={isOpen} onOpenChange={(o) => { setIsOpen(o); if (!o) resetForm(); }}>
           <DialogTrigger asChild>
-            <Button><Plus className="mr-2 h-4 w-4" />Nova Nota</Button>
+            <Button><Plus className="mr-2 h-4 w-4" />Novo Conceito</Button>
           </DialogTrigger>
           <DialogContent>
-            <DialogHeader><DialogTitle>Registrar Nota</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>Registrar Conceito</DialogTitle></DialogHeader>
             <div className="space-y-4 mt-4">
               <div className="space-y-2">
                 <Label>Matéria *</Label>
@@ -114,20 +125,31 @@ export default function Grades() {
                 <Label>Título *</Label>
                 <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="Ex: P1, Trabalho 1" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Nota *</Label>
-                  <Input type="number" step="0.1" min="0" value={grade} onChange={e => setGrade(e.target.value)} placeholder="8.5" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Nota Máxima</Label>
-                  <Input type="number" step="0.1" min="0" value={maxGrade} onChange={e => setMaxGrade(e.target.value)} placeholder="10" />
+              <div className="space-y-2">
+                <Label>Conceito *</Label>
+                <div className="grid grid-cols-4 gap-2">
+                  {CONCEPTS.map(c => (
+                    <button
+                      key={c.value}
+                      type="button"
+                      onClick={() => setGradeValue(String(c.value))}
+                      className={cn(
+                        'flex flex-col items-center gap-1 p-3 rounded-lg border-2 transition-all',
+                        gradeValue === String(c.value)
+                          ? 'border-foreground scale-105 shadow-md'
+                          : 'border-border hover:border-muted-foreground/50'
+                      )}
+                    >
+                      <span className={cn('text-lg font-bold px-2 py-0.5 rounded', c.color)}>{c.label}</span>
+                      <span className="text-[10px] text-muted-foreground">{c.full}</span>
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
             <DialogFooter className="mt-6">
               <Button variant="outline" onClick={() => setIsOpen(false)}>Cancelar</Button>
-              <Button onClick={handleCreate} disabled={!subjectId || !title.trim() || !grade || createGrade.isPending}>
+              <Button onClick={handleCreate} disabled={!subjectId || !title.trim() || !gradeValue || createGrade.isPending}>
                 {createGrade.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Registrar
               </Button>
@@ -139,88 +161,122 @@ export default function Grades() {
       {grades.length === 0 ? (
         <EmptyState
           variant="grades"
-          title="Nenhuma nota registrada"
-          description="Comece registrando suas notas para acompanhar seu desempenho"
-          action={<Button onClick={() => setIsOpen(true)}><Plus className="mr-2 h-4 w-4" />Registrar Nota</Button>}
+          title="Nenhum conceito registrado"
+          description="Comece registrando seus conceitos para acompanhar seu desempenho"
+          action={<Button onClick={() => setIsOpen(true)}><Plus className="mr-2 h-4 w-4" />Registrar Conceito</Button>}
         />
       ) : (
         <>
-          {/* Averages */}
+          {/* Subject summary cards */}
           <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {subjectStats.map(s => (
               <Card key={s.name}>
                 <CardContent className="p-4">
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2 mb-3">
                     <div className="h-3 w-3 rounded-full" style={{ backgroundColor: s.color }} />
                     <span className="text-sm font-medium truncate">{s.name}</span>
                   </div>
-                  <div className="text-2xl font-bold">{s.avg.toFixed(1)}</div>
-                  <p className="text-xs text-muted-foreground">{s.grades.length} nota(s)</p>
+                  <div className="flex items-center gap-2">
+                    <span className={cn('text-xl font-bold px-2.5 py-1 rounded', s.dominant.color)}>
+                      {s.dominant.label}
+                    </span>
+                    <span className="text-xs text-muted-foreground">{s.dominant.full}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">{s.grades.length} conceito(s)</p>
                 </CardContent>
               </Card>
             ))}
           </div>
 
-          {/* Chart */}
-          {grades.length > 1 && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">Desempenho ao Longo do Tempo</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={250}>
-                  <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                    <XAxis dataKey="name" tick={{ fontSize: 12 }} className="fill-muted-foreground" />
-                    <YAxis domain={[0, 10]} tick={{ fontSize: 12 }} className="fill-muted-foreground" />
-                    <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px', color: 'hsl(var(--card-foreground))' }} />
-                    {subjectStats.map(s => (
-                      <Line key={s.name} type="monotone" dataKey={s.name} stroke={s.color} strokeWidth={2} dot={{ r: 4 }} />
-                    ))}
-                  </LineChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          )}
+          {/* Concept distribution per subject */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Distribuição de Conceitos</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {subjectStats.map(s => {
+                  const total = s.grades.length;
+                  return (
+                    <div key={s.name} className="space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: s.color }} />
+                        <span className="text-sm font-medium">{s.name}</span>
+                      </div>
+                      <div className="flex h-6 rounded-full overflow-hidden bg-muted">
+                        {CONCEPTS.map(c => {
+                          const count = s.grades.filter(g => g === c.value).length;
+                          if (count === 0) return null;
+                          const pct = (count / total) * 100;
+                          return (
+                            <div
+                              key={c.value}
+                              className={cn('flex items-center justify-center text-[10px] font-bold', c.color)}
+                              style={{ width: `${pct}%` }}
+                              title={`${c.label}: ${count}`}
+                            >
+                              {pct >= 15 && c.label}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              {/* Legend */}
+              <div className="flex gap-4 mt-4 justify-center">
+                {CONCEPTS.map(c => (
+                  <div key={c.value} className="flex items-center gap-1.5 text-xs">
+                    <span className={cn('px-1.5 py-0.5 rounded font-bold', c.color)}>{c.label}</span>
+                    <span className="text-muted-foreground">{c.full}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Grade list */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Todas as Notas</CardTitle>
+              <CardTitle className="text-base">Todos os Conceitos</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {grades.map(g => (
-                  <div key={g.id} className="flex items-center justify-between p-3 rounded-lg border group hover:bg-muted/50 transition-colors">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="h-3 w-3 rounded-full flex-shrink-0" style={{ backgroundColor: g.subject?.color || '#94a3b8' }} />
-                      <div className="min-w-0">
-                        <p className="font-medium text-sm">{g.title}</p>
-                        <p className="text-xs text-muted-foreground">{g.subject?.name}</p>
+                {grades.map(g => {
+                  const concept = getConceptFromValue(g.grade);
+                  return (
+                    <div key={g.id} className="flex items-center justify-between p-3 rounded-lg border group hover:bg-muted/50 transition-colors">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="h-3 w-3 rounded-full flex-shrink-0" style={{ backgroundColor: g.subject?.color || '#94a3b8' }} />
+                        <div className="min-w-0">
+                          <p className="font-medium text-sm">{g.title}</p>
+                          <p className="text-xs text-muted-foreground">{g.subject?.name}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Badge className={cn('text-sm font-bold', concept.color)}>{concept.label}</Badge>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 text-destructive">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Remover conceito?</AlertDialogTitle>
+                              <AlertDialogDescription>Esta ação não pode ser desfeita.</AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => deleteGrade.mutate(g.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Remover</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <Badge variant="secondary" className="text-sm">{g.grade}/{g.max_grade}</Badge>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 text-destructive">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Remover nota?</AlertDialogTitle>
-                            <AlertDialogDescription>Esta ação não pode ser desfeita.</AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => deleteGrade.mutate(g.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Remover</AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
