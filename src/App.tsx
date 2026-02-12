@@ -29,6 +29,7 @@ import AdminStudy from "./pages/AdminStudy";
 import Grades from "./pages/Grades";
 import AdminMetrics from "./pages/AdminMetrics";
 import Focus from "./pages/Focus";
+import Install from "./pages/Install";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -68,6 +69,7 @@ const App = () => (
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/grades" element={<Grades />} />
                 <Route path="/focus" element={<Focus />} />
+                <Route path="/install" element={<Install />} />
                 {/* Admin routes */}
                 <Route element={<AdminRoute />}>
                   <Route path="/admin/subjects" element={<AdminSubjects />} />

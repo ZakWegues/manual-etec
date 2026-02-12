@@ -55,6 +55,38 @@ export type Database = {
           },
         ]
       }
+      activity_comments: {
+        Row: {
+          activity_id: string
+          content: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          activity_id: string
+          content: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          activity_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_comments_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activity_progress: {
         Row: {
           activity_id: string
@@ -287,6 +319,41 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "schedule_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shared_materials: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          subject_id: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          subject_id: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          subject_id?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_materials_subject_id_fkey"
             columns: ["subject_id"]
             isOneToOne: false
             referencedRelation: "subjects"
