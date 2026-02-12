@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Edit2, GraduationCap, Loader2, Plus, Trash2, Youtube, FileText } from 'lucide-react';
+import { Calendar, Copy, Edit2, GraduationCap, Loader2, Plus, Trash2, Youtube, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { Activity } from '@/types/database';
@@ -57,6 +57,22 @@ export default function AdminActivities() {
         file_url: (v as any).file_url || '',
       })) || []
     );
+  };
+
+  const duplicateActivity = (activity: Activity) => {
+    setSubjectId(activity.subject_id);
+    setTitle(activity.title + ' (cópia)');
+    setDescription(activity.description || '');
+    setDueDate(activity.due_date);
+    setResources(
+      activity.videos?.map(v => ({
+        youtube_url: v.youtube_url,
+        title: v.title || '',
+        type: ((v as any).type || 'video') as 'video' | 'pdf',
+        file_url: (v as any).file_url || '',
+      })) || []
+    );
+    setIsCreateOpen(true);
   };
 
   const handleCreate = () => {
@@ -266,6 +282,9 @@ export default function AdminActivities() {
                           </div>
                         </div>
                         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => duplicateActivity(activity)} title="Duplicar">
+                            <Copy className="h-4 w-4" />
+                          </Button>
                           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditDialog(activity)}>
                             <Edit2 className="h-4 w-4" />
                           </Button>

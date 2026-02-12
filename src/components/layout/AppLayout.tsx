@@ -3,9 +3,16 @@ import { AppSidebar } from './AppSidebar';
 import { FeedbackDialog } from '@/components/FeedbackDialog';
 import { NotificationBell } from '@/components/NotificationBell';
 import { GlobalSearch } from '@/components/GlobalSearch';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
+import { PageTransition } from '@/components/PageTransition';
+import { useAccentColor } from '@/hooks/useAccentColor';
 
 export function AppLayout() {
+  const location = useLocation();
+  // Initialize accent color on layout mount
+  useAccentColor();
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
@@ -20,7 +27,11 @@ export function AppLayout() {
             </div>
           </header>
           <main className="flex-1 p-4 md:p-6">
-            <Outlet />
+            <AnimatePresence mode="wait">
+              <PageTransition key={location.pathname}>
+                <Outlet />
+              </PageTransition>
+            </AnimatePresence>
           </main>
         </SidebarInset>
       </div>
