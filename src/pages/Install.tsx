@@ -32,11 +32,19 @@ export default function Install() {
   return (
     <div className="space-y-6 animate-fade-in max-w-2xl mx-auto">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Instalar App</h1>
-        <p className="text-muted-foreground mt-1">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Instalar App</h1>
+        <p className="text-sm sm:text-base text-muted-foreground mt-1">
           Instale o Manual ETEC no seu dispositivo para acesso rápido
         </p>
       </div>
+
+      <Card className="border-warning/50 bg-warning/5">
+        <CardContent className="py-4 px-4 sm:px-6">
+          <p className="text-sm text-muted-foreground italic text-center">
+            "A instalação do aplicativo ainda não está disponível. Estou trabalhando nisso e em breve vocês poderão instalar normalmente."
+          </p>
+        </CardContent>
+      </Card>
 
       {isInstalled ? (
         <Card className="border-success">

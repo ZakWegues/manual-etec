@@ -89,21 +89,21 @@ export default function Grades() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-            <GraduationCap className="h-8 w-8 text-primary" />
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2 sm:gap-3">
+            <GraduationCap className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
             Minhas Notas
           </h1>
-          <p className="text-muted-foreground mt-1">Registre e acompanhe seus conceitos por matéria</p>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">Registre e acompanhe suas notas por matéria</p>
         </div>
         <Dialog open={isOpen} onOpenChange={(o) => { setIsOpen(o); if (!o) resetForm(); }}>
           <DialogTrigger asChild>
-            <Button><Plus className="mr-2 h-4 w-4" />Novo Conceito</Button>
+            <Button size="sm" className="w-full sm:w-auto"><Plus className="mr-2 h-4 w-4" />Nova Nota</Button>
           </DialogTrigger>
-          <DialogContent>
-            <DialogHeader><DialogTitle>Registrar Conceito</DialogTitle></DialogHeader>
+          <DialogContent className="max-w-[95vw] sm:max-w-lg">
+            <DialogHeader><DialogTitle>Registrar Nota</DialogTitle></DialogHeader>
             <div className="space-y-4 mt-4">
               <div className="space-y-2">
                 <Label>Matéria *</Label>
@@ -126,7 +126,7 @@ export default function Grades() {
                 <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="Ex: P1, Trabalho 1" />
               </div>
               <div className="space-y-2">
-                <Label>Conceito *</Label>
+                <Label>Nota *</Label>
                 <div className="grid grid-cols-4 gap-2">
                   {CONCEPTS.map(c => (
                     <button
@@ -134,14 +134,14 @@ export default function Grades() {
                       type="button"
                       onClick={() => setGradeValue(String(c.value))}
                       className={cn(
-                        'flex flex-col items-center gap-1 p-3 rounded-lg border-2 transition-all',
+                        'flex flex-col items-center gap-1 p-2 sm:p-3 rounded-lg border-2 transition-all',
                         gradeValue === String(c.value)
                           ? 'border-foreground scale-105 shadow-md'
                           : 'border-border hover:border-muted-foreground/50'
                       )}
                     >
-                      <span className={cn('text-lg font-bold px-2 py-0.5 rounded', c.color)}>{c.label}</span>
-                      <span className="text-[10px] text-muted-foreground">{c.full}</span>
+                      <span className={cn('text-base sm:text-lg font-bold px-2 py-0.5 rounded', c.color)}>{c.label}</span>
+                      <span className="text-[9px] sm:text-[10px] text-muted-foreground">{c.full}</span>
                     </button>
                   ))}
                 </div>
@@ -161,28 +161,28 @@ export default function Grades() {
       {grades.length === 0 ? (
         <EmptyState
           variant="grades"
-          title="Nenhum conceito registrado"
-          description="Comece registrando seus conceitos para acompanhar seu desempenho"
-          action={<Button onClick={() => setIsOpen(true)}><Plus className="mr-2 h-4 w-4" />Registrar Conceito</Button>}
+          title="Nenhuma nota registrada"
+          description="Comece registrando suas notas para acompanhar seu desempenho"
+          action={<Button onClick={() => setIsOpen(true)}><Plus className="mr-2 h-4 w-4" />Registrar Nota</Button>}
         />
       ) : (
         <>
           {/* Subject summary cards */}
-          <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <div className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {subjectStats.map(s => (
               <Card key={s.name}>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="h-3 w-3 rounded-full" style={{ backgroundColor: s.color }} />
-                    <span className="text-sm font-medium truncate">{s.name}</span>
+                <CardContent className="p-3 sm:p-4">
+                  <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                    <div className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full flex-shrink-0" style={{ backgroundColor: s.color }} />
+                    <span className="text-xs sm:text-sm font-medium truncate">{s.name}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className={cn('text-xl font-bold px-2.5 py-1 rounded', s.dominant.color)}>
+                    <span className={cn('text-lg sm:text-xl font-bold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded', s.dominant.color)}>
                       {s.dominant.label}
                     </span>
-                    <span className="text-xs text-muted-foreground">{s.dominant.full}</span>
+                    <span className="text-[10px] sm:text-xs text-muted-foreground">{s.dominant.full}</span>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2">{s.grades.length} conceito(s)</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground mt-1.5 sm:mt-2">{s.grades.length} nota(s)</p>
                 </CardContent>
               </Card>
             ))}
@@ -190,10 +190,10 @@ export default function Grades() {
 
           {/* Concept distribution per subject */}
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">Distribuição de Conceitos</CardTitle>
+            <CardHeader className="pb-2 px-3 sm:px-6">
+              <CardTitle className="text-sm sm:text-base">Distribuição de Notas</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-3 sm:px-6">
               <div className="space-y-4">
                 {subjectStats.map(s => {
                   const total = s.grades.length;
@@ -201,9 +201,9 @@ export default function Grades() {
                     <div key={s.name} className="space-y-1.5">
                       <div className="flex items-center gap-2">
                         <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: s.color }} />
-                        <span className="text-sm font-medium">{s.name}</span>
+                        <span className="text-xs sm:text-sm font-medium">{s.name}</span>
                       </div>
-                      <div className="flex h-6 rounded-full overflow-hidden bg-muted">
+                      <div className="flex h-5 sm:h-6 rounded-full overflow-hidden bg-muted">
                         {CONCEPTS.map(c => {
                           const count = s.grades.filter(g => g === c.value).length;
                           if (count === 0) return null;
@@ -211,7 +211,7 @@ export default function Grades() {
                           return (
                             <div
                               key={c.value}
-                              className={cn('flex items-center justify-center text-[10px] font-bold', c.color)}
+                              className={cn('flex items-center justify-center text-[9px] sm:text-[10px] font-bold', c.color)}
                               style={{ width: `${pct}%` }}
                               title={`${c.label}: ${count}`}
                             >
@@ -225,11 +225,11 @@ export default function Grades() {
                 })}
               </div>
               {/* Legend */}
-              <div className="flex gap-4 mt-4 justify-center">
+              <div className="flex flex-wrap gap-2 sm:gap-4 mt-4 justify-center">
                 {CONCEPTS.map(c => (
-                  <div key={c.value} className="flex items-center gap-1.5 text-xs">
-                    <span className={cn('px-1.5 py-0.5 rounded font-bold', c.color)}>{c.label}</span>
-                    <span className="text-muted-foreground">{c.full}</span>
+                  <div key={c.value} className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs">
+                    <span className={cn('px-1 sm:px-1.5 py-0.5 rounded font-bold', c.color)}>{c.label}</span>
+                    <span className="text-muted-foreground hidden sm:inline">{c.full}</span>
                   </div>
                 ))}
               </div>
@@ -238,33 +238,33 @@ export default function Grades() {
 
           {/* Grade list */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Todos os Conceitos</CardTitle>
+            <CardHeader className="px-3 sm:px-6">
+              <CardTitle className="text-sm sm:text-base">Todas as Notas</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-3 sm:px-6">
               <div className="space-y-2">
                 {grades.map(g => {
                   const concept = getConceptFromValue(g.grade);
                   return (
-                    <div key={g.id} className="flex items-center justify-between p-3 rounded-lg border group hover:bg-muted/50 transition-colors">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="h-3 w-3 rounded-full flex-shrink-0" style={{ backgroundColor: g.subject?.color || '#94a3b8' }} />
+                    <div key={g.id} className="flex items-center justify-between p-2 sm:p-3 rounded-lg border group hover:bg-muted/50 transition-colors">
+                      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                        <div className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full flex-shrink-0" style={{ backgroundColor: g.subject?.color || '#94a3b8' }} />
                         <div className="min-w-0">
-                          <p className="font-medium text-sm">{g.title}</p>
-                          <p className="text-xs text-muted-foreground">{g.subject?.name}</p>
+                          <p className="font-medium text-xs sm:text-sm">{g.title}</p>
+                          <p className="text-[10px] sm:text-xs text-muted-foreground">{g.subject?.name}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <Badge className={cn('text-sm font-bold', concept.color)}>{concept.label}</Badge>
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <Badge className={cn('text-xs sm:text-sm font-bold', concept.color)}>{concept.label}</Badge>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 text-destructive">
-                              <Trash2 className="h-4 w-4" />
+                            <Button variant="ghost" size="icon" className="h-7 w-7 sm:h-8 sm:w-8 opacity-0 group-hover:opacity-100 text-destructive">
+                              <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                             </Button>
                           </AlertDialogTrigger>
-                          <AlertDialogContent>
+                          <AlertDialogContent className="max-w-[95vw] sm:max-w-lg">
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Remover conceito?</AlertDialogTitle>
+                              <AlertDialogTitle>Remover nota?</AlertDialogTitle>
                               <AlertDialogDescription>Esta ação não pode ser desfeita.</AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
