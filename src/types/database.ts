@@ -92,6 +92,17 @@ export interface StudyVideo {
   file_url: string | null;
 }
 
+export interface Grade {
+  id: string;
+  user_id: string;
+  subject_id: string;
+  title: string;
+  grade: number;
+  max_grade: number;
+  created_at: string;
+  subject?: Subject;
+}
+
 export interface ActivityWithProgress extends Activity {
   is_completed: boolean;
 }

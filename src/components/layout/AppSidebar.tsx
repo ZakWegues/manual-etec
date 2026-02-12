@@ -1,4 +1,4 @@
-import { Calendar, BookOpen, GraduationCap, LayoutDashboard, LogOut, Settings, Bot, MessageSquare, KeyRound, User, ChevronUp, PlayCircle } from 'lucide-react';
+import { Calendar, BookOpen, GraduationCap, LayoutDashboard, LogOut, Settings, Bot, MessageSquare, KeyRound, User, ChevronUp, PlayCircle, BarChart3, Star } from 'lucide-react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -29,6 +29,7 @@ const mainNavItems = [
   { title: 'Cronograma', url: '/schedule', icon: Calendar },
   { title: 'Matérias', url: '/subjects', icon: BookOpen },
   { title: 'Estudo', url: '/study', icon: PlayCircle },
+  { title: 'Notas', url: '/grades', icon: Star },
   { title: 'Calendário', url: '/calendar', icon: Calendar },
   { title: 'Assistente IA', url: '/ai-assistant', icon: Bot },
 ];
@@ -37,6 +38,7 @@ const adminNavItems = [
   { title: 'Gerenciar Matérias', url: '/admin/subjects', icon: BookOpen },
   { title: 'Gerenciar Atividades', url: '/admin/activities', icon: GraduationCap },
   { title: 'Gerenciar Estudo', url: '/admin/study', icon: PlayCircle },
+  { title: 'Métricas', url: '/admin/metrics', icon: BarChart3 },
   { title: 'Feedbacks', url: '/admin/feedback', icon: MessageSquare },
 ];
 
