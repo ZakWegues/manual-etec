@@ -100,8 +100,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
-    // Redirect to dashboard after email verification
-    const redirectUrl = `${window.location.origin}/dashboard`;
+    // Redirect to Vercel deployment after email verification
+    const redirectUrl = 'https://manual-etec.vercel.app/dashboard';
     
     const { error } = await supabase.auth.signUp({
       email,
@@ -121,7 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const resetPassword = async (email: string) => {
-    const redirectUrl = `${window.location.origin}/reset-password`;
+    const redirectUrl = 'https://manual-etec.vercel.app/reset-password';
     
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: redirectUrl,
