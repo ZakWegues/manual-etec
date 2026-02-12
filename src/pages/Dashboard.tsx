@@ -83,12 +83,6 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* Charts */}
-      <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
-        <WeeklyChart activities={activities} />
-        <SubjectChart activities={activities} />
-      </div>
-
       {/* Content Grid */}
       <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
         {/* Upcoming Activities */}
