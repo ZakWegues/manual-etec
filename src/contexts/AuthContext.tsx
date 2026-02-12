@@ -100,8 +100,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
-    // Redirect to external dashboard after email verification
-    const redirectUrl = 'https://etec-aid-hub.vercel.app/dashboard';
+    // Redirect to dashboard after email verification
+    const redirectUrl = `${window.location.origin}/dashboard`;
     
     const { error } = await supabase.auth.signUp({
       email,
