@@ -4,11 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, CheckCircle2, Clock, Loader2, Youtube, AlertTriangle, Circle } from 'lucide-react';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, CheckCircle2, Clock, Download, Loader2, Youtube, AlertTriangle, Circle } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, isToday, isPast } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
 import type { ActivityWithProgress } from '@/types/database';
+import { generateIcsFile, downloadIcsFile } from '@/lib/icsGenerator';
+import { toast } from 'sonner';
 
 const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
@@ -103,16 +105,38 @@ export default function CalendarPage() {
     );
   }
 
+  const handleExportIcs = () => {
+    const pendingActivities = activities.filter(a => !a.is_completed);
+    if (pendingActivities.length === 0) {
+      toast.info('Nenhuma atividade pendente para exportar');
+      return;
+    }
+    const events = pendingActivities.map(a => ({
+      title: `${a.subject?.name ? a.subject.name + ' - ' : ''}${a.title}`,
+      description: a.description || undefined,
+      date: a.due_date,
+    }));
+    const ics = generateIcsFile(events);
+    downloadIcsFile(ics);
+    toast.success(`${events.length} atividades exportadas!`);
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-          <CalendarIcon className="h-8 w-8 text-primary" />
-          Calendário de Atividades
-        </h1>
-        <p className="text-muted-foreground">
-          Visualize todas as atividades por data de entrega
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+            <CalendarIcon className="h-8 w-8 text-primary" />
+            Calendário de Atividades
+          </h1>
+          <p className="text-muted-foreground">
+            Visualize todas as atividades por data de entrega
+          </p>
+        </div>
+        <Button variant="outline" onClick={handleExportIcs}>
+          <Download className="mr-2 h-4 w-4" />
+          Exportar .ics
+        </Button>
       </div>
 
       {/* Status Summary Cards */}

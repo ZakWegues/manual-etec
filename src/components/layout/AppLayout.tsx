@@ -7,10 +7,10 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { PageTransition } from '@/components/PageTransition';
 import { useAccentColor } from '@/hooks/useAccentColor';
+import { Onboarding } from '@/components/Onboarding';
 
 export function AppLayout() {
   const location = useLocation();
-  // Initialize accent color on layout mount
   useAccentColor();
 
   return (
@@ -35,6 +35,7 @@ export function AppLayout() {
           </main>
         </SidebarInset>
       </div>
+      <Onboarding />
     </SidebarProvider>
   );
 }
