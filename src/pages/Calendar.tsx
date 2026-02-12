@@ -142,40 +142,40 @@ export default function CalendarPage() {
       {/* Status Summary Cards */}
       <div className="grid grid-cols-3 gap-2 sm:gap-4">
         <Card className="border-l-4 border-l-success">
-          <CardContent className="p-2 sm:pt-4 sm:p-4">
-            <div className="flex items-center gap-2 sm:gap-3">
+          <CardContent className="p-2 sm:p-4">
+            <div className="flex flex-col items-center text-center sm:flex-row sm:text-left gap-1 sm:gap-3">
               <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-success/10 flex items-center justify-center flex-shrink-0">
                 <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-success" />
               </div>
-              <div>
-                <p className="text-xl sm:text-2xl font-bold">{stats.completed}</p>
-                <p className="text-[10px] sm:text-sm text-muted-foreground">Concluídas</p>
+              <div className="min-w-0">
+                <p className="text-lg sm:text-2xl font-bold leading-tight">{stats.completed}</p>
+                <p className="text-[10px] sm:text-sm text-muted-foreground leading-tight truncate">Concluídas</p>
               </div>
             </div>
           </CardContent>
         </Card>
         <Card className="border-l-4 border-l-warning">
-          <CardContent className="p-2 sm:pt-4 sm:p-4">
-            <div className="flex items-center gap-2 sm:gap-3">
+          <CardContent className="p-2 sm:p-4">
+            <div className="flex flex-col items-center text-center sm:flex-row sm:text-left gap-1 sm:gap-3">
               <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-warning/10 flex items-center justify-center flex-shrink-0">
                 <Circle className="h-4 w-4 sm:h-5 sm:w-5 text-warning" />
               </div>
-              <div>
-                <p className="text-xl sm:text-2xl font-bold">{stats.pending}</p>
-                <p className="text-[10px] sm:text-sm text-muted-foreground">Pendentes</p>
+              <div className="min-w-0">
+                <p className="text-lg sm:text-2xl font-bold leading-tight">{stats.pending}</p>
+                <p className="text-[10px] sm:text-sm text-muted-foreground leading-tight truncate">Pendentes</p>
               </div>
             </div>
           </CardContent>
         </Card>
         <Card className="border-l-4 border-l-destructive">
-          <CardContent className="p-2 sm:pt-4 sm:p-4">
-            <div className="flex items-center gap-2 sm:gap-3">
+          <CardContent className="p-2 sm:p-4">
+            <div className="flex flex-col items-center text-center sm:flex-row sm:text-left gap-1 sm:gap-3">
               <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-destructive/10 flex items-center justify-center flex-shrink-0">
                 <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-destructive" />
               </div>
-              <div>
-                <p className="text-xl sm:text-2xl font-bold">{stats.overdue}</p>
-                <p className="text-[10px] sm:text-sm text-muted-foreground">Atrasadas</p>
+              <div className="min-w-0">
+                <p className="text-lg sm:text-2xl font-bold leading-tight">{stats.overdue}</p>
+                <p className="text-[10px] sm:text-sm text-muted-foreground leading-tight truncate">Atrasadas</p>
               </div>
             </div>
           </CardContent>
