@@ -146,7 +146,7 @@ export function Onboarding() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className={`z-[10001] bg-card border border-border rounded-xl shadow-2xl p-5 w-80 ${
+            className={`z-[10001] bg-card border border-border rounded-xl shadow-2xl p-4 sm:p-5 w-[calc(100vw-2rem)] sm:w-80 max-w-80 ${
               isFirstOrLast ? 'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2' : 'fixed'
             }`}
             style={isFirstOrLast ? {} : tooltipStyle}
