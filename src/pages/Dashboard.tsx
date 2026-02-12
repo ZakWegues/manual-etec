@@ -8,6 +8,8 @@ import { BookOpen, Calendar, CheckCircle2, Clock, GraduationCap, TrendingUp } fr
 import { Link } from 'react-router-dom';
 import { format, isAfter, isBefore, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { WeeklyChart } from '@/components/dashboard/WeeklyChart';
+import { SubjectChart } from '@/components/dashboard/SubjectChart';
 
 export default function Dashboard() {
   const { profile, isAdmin } = useAuth();
@@ -79,6 +81,12 @@ export default function Dashboard() {
             <Progress value={completionRate} className="mt-2 h-1.5 sm:h-2" />
           </CardContent>
         </Card>
+      </div>
+
+      {/* Charts */}
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
+        <WeeklyChart activities={activities} />
+        <SubjectChart activities={activities} />
       </div>
 
       {/* Content Grid */}

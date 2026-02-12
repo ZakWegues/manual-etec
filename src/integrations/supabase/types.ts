@@ -155,6 +155,44 @@ export type Database = {
         }
         Relationships: []
       }
+      grades: {
+        Row: {
+          created_at: string
+          grade: number
+          id: string
+          max_grade: number
+          subject_id: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          grade: number
+          id?: string
+          max_grade?: number
+          subject_id: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          grade?: number
+          id?: string
+          max_grade?: number
+          subject_id?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grades_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string

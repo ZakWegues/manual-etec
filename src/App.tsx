@@ -26,6 +26,8 @@ import AdminFeedback from "./pages/AdminFeedback";
 import Study from "./pages/Study";
 import StudySubject from "./pages/StudySubject";
 import AdminStudy from "./pages/AdminStudy";
+import Grades from "./pages/Grades";
+import AdminMetrics from "./pages/AdminMetrics";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -63,6 +65,7 @@ const App = () => (
                 <Route path="/change-password" element={<ChangePassword />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/grades" element={<Grades />} />
                 
                 {/* Admin routes */}
                 <Route element={<AdminRoute />}>
@@ -70,6 +73,7 @@ const App = () => (
                   <Route path="/admin/activities" element={<AdminActivities />} />
                   <Route path="/admin/feedback" element={<AdminFeedback />} />
                   <Route path="/admin/study" element={<AdminStudy />} />
+                  <Route path="/admin/metrics" element={<AdminMetrics />} />
                 </Route>
               </Route>
             </Route>
