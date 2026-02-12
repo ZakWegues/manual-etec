@@ -1,4 +1,4 @@
-import { Calendar, BookOpen, GraduationCap, LayoutDashboard, LogOut, Settings, Bot, MessageSquare, KeyRound, User, ChevronUp, PlayCircle, BarChart3, Star } from 'lucide-react';
+import { Calendar, BookOpen, GraduationCap, LayoutDashboard, LogOut, Settings, Bot, MessageSquare, KeyRound, User, ChevronUp, PlayCircle, BarChart3, Star, Timer } from 'lucide-react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -30,6 +30,7 @@ const mainNavItems = [
   { title: 'Matérias', url: '/subjects', icon: BookOpen },
   { title: 'Estudo', url: '/study', icon: PlayCircle },
   { title: 'Notas', url: '/grades', icon: Star },
+  { title: 'Modo Foco', url: '/focus', icon: Timer },
   { title: 'Calendário', url: '/calendar', icon: Calendar },
   { title: 'Assistente IA', url: '/ai-assistant', icon: Bot },
 ];
@@ -96,7 +97,7 @@ export function AppSidebar() {
                     isActive={isActive(item.url)}
                     tooltip={item.title}
                   >
-                    <NavLink to={item.url}>
+                    <NavLink to={item.url} data-sidebar-item={item.title}>
                       <item.icon className="h-5 w-5" />
                       <span>{item.title}</span>
                     </NavLink>
