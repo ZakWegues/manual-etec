@@ -1,99 +1,172 @@
 
+# Plano de Melhorias - Manual ETEC
 
-# Plano de Implementacao - 4 Funcionalidades
-
-Este plano cobre: foto de perfil, landing page enriquecida, notificacoes push e busca global.
-
----
-
-## 1. Foto de Perfil
-
-### O que muda
-- Usuarios poderao fazer upload de uma foto de perfil na pagina "Meu Perfil"
-- A foto aparecera na sidebar, na pagina de perfil e em qualquer lugar que mostre o avatar
-
-### Detalhes tecnicos
-- **Banco de dados**: Adicionar coluna `avatar_url` (text, nullable) na tabela `profiles`
-- **Storage**: Criar bucket `avatars` (publico) com politicas RLS para que cada usuario so possa fazer upload/atualizar sua propria foto
-- **Arquivos modificados**:
-  - `src/pages/Profile.tsx` - Adicionar botao de upload sobre o avatar, com preview e envio ao storage
-  - `src/components/layout/AppSidebar.tsx` - Usar `AvatarImage` com a URL do avatar quando disponivel
-  - `src/contexts/AuthContext.tsx` - Expor `avatar_url` do profile e adicionar funcao `updateProfile`
-  - `src/types/database.ts` - Adicionar `avatar_url` ao tipo `Profile`
+Este plano cobre as 13 funcionalidades solicitadas, organizadas em 4 fases para implementacao incremental e testavel.
 
 ---
 
-## 2. Landing Page Mais Rica
+## Fase 1 - Fundacao Visual e UX Rapida
 
-### O que muda
-- Navbar fixa no topo com logo e botoes "Entrar" / "Criar Conta"
-- Secao de estatisticas animadas (ex: "100+ Alunos", "50+ Atividades")
-- Secao "Como Funciona" com 3 passos ilustrados
-- Secao de depoimentos/testimonials com cards
-- Footer expandido com links uteis
-- Animacoes de scroll (fade-in ao aparecer na tela)
+### 1.1 Animacoes mais suaves (framer-motion)
+- Instalar `framer-motion`
+- Criar componente `PageTransition` que envolve cada pagina com fade + slide
+- Adicionar `AnimatePresence` no `AppLayout` para transicoes entre rotas
+- Micro-interacoes nos cards (hover scale, stagger em listas)
+- Arquivos: `src/components/PageTransition.tsx`, `src/components/layout/AppLayout.tsx`, paginas principais
 
-### Detalhes tecnicos
-- **Arquivos modificados**:
-  - `src/pages/Index.tsx` - Reescrever com todas as novas secoes
-  - `src/index.css` - Adicionar animacoes de scroll (intersection observer via classes CSS)
-- **Sem mudancas no banco de dados** - conteudo estatico
+### 1.2 Empty states mais ricos
+- Criar componente `EmptyState` reutilizavel com ilustracoes SVG inline (leves, sem dependencia externa)
+- Variantes: atividades vazias, materias vazias, calendario vazio, estudo vazio
+- Substituir todos os textos "Nenhuma atividade..." por este componente
+- Arquivos: `src/components/EmptyState.tsx`, paginas que exibem listas vazias
 
----
+### 1.3 Tema personalizavel (cor de destaque)
+- Adicionar opcao de cor de destaque nas Configuracoes (azul, verde, roxo, laranja, rosa)
+- Salvar preferencia no `localStorage`
+- Criar hook `useAccentColor` que aplica CSS variables dinamicamente no `:root`
+- As cores de destaque alteram `--primary` e `--ring`
+- Arquivos: `src/hooks/useAccentColor.ts`, `src/pages/Settings.tsx`
 
-## 3. Notificacoes Push (In-App)
-
-### O que muda
-- Icone de sino no header do app com badge de contagem
-- Dropdown com lista de notificacoes (atividades proximas do prazo, novas atividades adicionadas)
-- Notificacoes geradas automaticamente com base nos prazos das atividades
-
-### Detalhes tecnicos
-- **Banco de dados**: Criar tabela `notifications` com colunas: `id`, `user_id`, `title`, `message`, `type`, `is_read`, `link`, `created_at`
-- Politicas RLS: cada usuario ve/atualiza apenas suas proprias notificacoes
-- Criar funcao de banco `generate_activity_notifications` que cria notificacoes para atividades com prazo em 1-3 dias (pode ser chamada via trigger ou pelo frontend)
-- **Arquivos novos/modificados**:
-  - `src/hooks/useNotifications.ts` - Hook para buscar, marcar como lida, contar nao-lidas
-  - `src/components/NotificationBell.tsx` - Componente com Popover mostrando lista de notificacoes
-  - `src/components/layout/AppLayout.tsx` - Adicionar `NotificationBell` no header ao lado do FeedbackDialog
+### 1.4 Duplicar atividades (admin)
+- Adicionar botao "Duplicar" ao lado de Editar/Excluir na lista de atividades do admin
+- Ao clicar, abre o dialog de criacao ja preenchido com os dados da atividade original (titulo + " (copia)", mesma descricao, mesma materia, videos/PDFs)
+- Arquivos: `src/pages/AdminActivities.tsx`
 
 ---
 
-## 4. Busca Global
+## Fase 2 - Dashboard e Dados
 
-### O que muda
-- Campo de busca no header do app (com atalho Ctrl+K)
-- Busca por materias, atividades e conteudos de estudo
-- Resultados agrupados por categoria com links diretos
+### 2.1 Dashboard mais visual (graficos Recharts)
+- Adicionar ao Dashboard dois graficos:
+  - **Grafico de barras**: atividades concluidas por semana (ultimas 4 semanas)
+  - **Grafico de pizza/donut**: distribuicao de atividades por materia
+- Usar `recharts` (ja instalado) com cores das materias
+- Responsivo: em mobile os graficos empilham verticalmente
+- Arquivos: `src/pages/Dashboard.tsx`, `src/components/dashboard/WeeklyChart.tsx`, `src/components/dashboard/SubjectChart.tsx`
 
-### Detalhes tecnicos
-- **Arquivos novos/modificados**:
-  - `src/components/GlobalSearch.tsx` - Componente usando `cmdk` (Command, ja instalado) com Dialog para busca
-  - `src/components/layout/AppLayout.tsx` - Adicionar botao de busca no header que abre o dialog
-  - Busca feita client-side com queries em `subjects`, `activities` e `study_videos` usando `.ilike()` ou `.textSearch()`
-- **Sem mudancas no banco de dados** - usa tabelas existentes
+### 2.2 Sistema de notas/grades
+- **Migracao de banco**: criar tabela `grades` com colunas: `id`, `user_id`, `subject_id`, `title` (ex: "P1", "P2"), `grade` (decimal), `max_grade`, `created_at`
+- RLS: usuarios veem/editam apenas suas proprias notas
+- Criar pagina `/grades` com formulario para registrar notas por materia
+- Exibir media por materia e grafico de desempenho (linha temporal)
+- Adicionar link no sidebar
+- Arquivos: `src/pages/Grades.tsx`, `src/hooks/useGrades.ts`, `src/types/database.ts`, migracao SQL
+
+### 2.3 Painel de metricas (admin)
+- Criar pagina `/admin/metrics` acessivel apenas por admins
+- Consultas ao banco:
+  - Total de usuarios (count profiles)
+  - Taxa de conclusao geral e por materia (activity_progress vs activities)
+  - Atividades mais acessadas (baseado em progresso)
+- Graficos com Recharts: barras de conclusao por materia, linha de atividade ao longo do tempo
+- Arquivos: `src/pages/AdminMetrics.tsx`, sidebar admin, `src/App.tsx`
 
 ---
 
-## Ordem de Implementacao
+## Fase 3 - Funcionalidades Interativas
 
-1. **Foto de perfil** - Migracao de banco (avatar_url + bucket) -> UI de upload -> Exibicao no sidebar/perfil
-2. **Landing page** - Puramente frontend, sem dependencias
-3. **Busca global** - Puramente frontend, usa `cmdk` ja instalado
-4. **Notificacoes** - Migracao de banco (tabela notifications) -> Hook + componente -> Integracao no header
+### 3.1 Onboarding guiado
+- Criar componente de tour com overlay e tooltips posicionados (sem dependencia externa, implementacao leve com React portals)
+- 4-5 passos: sidebar, dashboard, cronograma, atividades, estudo
+- Ativar na primeira visita (flag `onboarding_completed` no localStorage)
+- Botao "Pular" e "Proximo" em cada passo
+- Arquivos: `src/components/Onboarding.tsx`, `src/components/layout/AppLayout.tsx`
+
+### 3.2 Modo "foco" (Pomodoro)
+- Criar pagina `/focus` com timer Pomodoro (25min estudo / 5min pausa, configuravel)
+- Selecionar materia para a sessao de estudo
+- Controles: iniciar, pausar, resetar, pular para pausa
+- Historico de sessoes salvo no localStorage (nao precisa de banco)
+- Som de notificacao ao terminar (Web Audio API)
+- Arquivos: `src/pages/Focus.tsx`, sidebar, `src/App.tsx`
+
+### 3.3 Calendario com exportacao .ics
+- Adicionar botao "Exportar" na pagina do Calendario
+- Gerar arquivo `.ics` com todas as atividades pendentes (titulo, data, descricao)
+- Download direto pelo navegador, sem backend
+- Formato compativel com Google Calendar, Apple Calendar, Outlook
+- Arquivos: `src/pages/Calendar.tsx`, `src/lib/icsGenerator.ts`
 
 ---
 
-## Resumo das Migracoes SQL
+## Fase 4 - Social e PWA
+
+### 4.1 Comentarios nas atividades
+- **Migracao de banco**: criar tabela `activity_comments` com: `id`, `activity_id`, `user_id`, `content`, `created_at`
+- RLS: todos autenticados podem ler, usuarios inserem/deletam os proprios
+- Na pagina de detalhe da atividade, adicionar secao de comentarios com campo de texto e lista
+- Exibir nome e avatar do autor (join com profiles)
+- Arquivos: `src/pages/ActivityDetail.tsx`, `src/hooks/useComments.ts`, migracao SQL
+
+### 4.2 Compartilhamento de materiais
+- **Migracao de banco**: criar tabela `shared_materials` com: `id`, `user_id`, `subject_id`, `title`, `content` (texto/markdown), `created_at`
+- RLS: todos autenticados podem ler, usuarios inserem/editam/deletam os proprios
+- Criar secao "Materiais dos Alunos" na pagina de detalhe da materia
+- Editor simples (textarea com suporte a markdown via react-markdown ja instalado)
+- Arquivos: `src/pages/SubjectDetail.tsx`, `src/hooks/useSharedMaterials.ts`, migracao SQL
+
+### 4.3 PWA (Progressive Web App)
+- Instalar `vite-plugin-pwa`
+- Configurar manifest com nome "Manual ETEC", icones, cores do tema
+- Configurar service worker com cache offline (paginas e assets)
+- Adicionar `navigateFallbackDenylist: [/^\/~oauth/]` para nao cachear rotas de auth
+- Adicionar meta tags mobile no `index.html`
+- Criar pagina `/install` com instrucoes de instalacao
+- Arquivos: `vite.config.ts`, `index.html`, `public/manifest.json`, icones, `src/pages/Install.tsx`
+
+---
+
+## Detalhes Tecnicos
+
+### Novas tabelas no banco de dados
 
 ```text
-Migracao 1:
-- ALTER TABLE profiles ADD COLUMN avatar_url text
-- Criar bucket "avatars" (publico)
-- Politicas RLS no bucket
+grades
++-------------+----------+-----------+
+| Coluna      | Tipo     | Obs       |
++-------------+----------+-----------+
+| id          | uuid     | PK        |
+| user_id     | uuid     | NOT NULL  |
+| subject_id  | uuid     | NOT NULL  |
+| title       | text     | NOT NULL  |
+| grade       | decimal  | NOT NULL  |
+| max_grade   | decimal  | default 10|
+| created_at  | timestamptz          |
++-------------+----------+-----------+
 
-Migracao 2:
-- CREATE TABLE notifications (id, user_id, title, message, type, is_read, link, created_at)
-- Politicas RLS para notifications
+activity_comments
++-------------+----------+-----------+
+| Coluna      | Tipo     | Obs       |
++-------------+----------+-----------+
+| id          | uuid     | PK        |
+| activity_id | uuid     | NOT NULL  |
+| user_id     | uuid     | NOT NULL  |
+| content     | text     | NOT NULL  |
+| created_at  | timestamptz          |
++-------------+----------+-----------+
+
+shared_materials
++-------------+----------+-----------+
+| Coluna      | Tipo     | Obs       |
++-------------+----------+-----------+
+| id          | uuid     | PK        |
+| user_id     | uuid     | NOT NULL  |
+| subject_id  | uuid     | NOT NULL  |
+| title       | text     | NOT NULL  |
+| content     | text     | NOT NULL  |
+| created_at  | timestamptz          |
++-------------+----------+-----------+
 ```
 
+### Novas rotas
+- `/grades` - Sistema de notas (aluno)
+- `/focus` - Modo foco / Pomodoro
+- `/admin/metrics` - Painel de metricas (admin)
+- `/install` - Instrucoes PWA
+
+### Dependencias a instalar
+- `framer-motion` - animacoes
+- `vite-plugin-pwa` - PWA
+
+### Ordem de implementacao recomendada
+Cada fase pode ser aprovada e implementada separadamente. A Fase 1 nao depende de banco de dados, entao pode ser feita imediatamente. As fases 2-4 envolvem migracoes que precisarao de aprovacao.
