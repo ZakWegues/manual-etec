@@ -49,7 +49,8 @@ serve(async (req) => {
       .eq('user_id', user.id)
       .single();
 
-    const userName = profile?.full_name || 'Aluno';
+    // Sanitize userName to prevent prompt injection
+    const userName = (profile?.full_name || 'Aluno').replace(/[^a-zA-ZÀ-ÿ\s]/g, '').slice(0, 50);
 
     const body = await req.json();
     const messages = body?.messages;

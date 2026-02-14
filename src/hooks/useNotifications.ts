@@ -11,7 +11,7 @@ export function useNotifications() {
   // Generate notifications on mount
   useEffect(() => {
     if (user?.id) {
-      supabase.rpc('generate_activity_notifications', { p_user_id: user.id }).then();
+      supabase.rpc('generate_activity_notifications').then();
     }
   }, [user?.id]);
 
