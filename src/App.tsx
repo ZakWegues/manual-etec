@@ -27,6 +27,7 @@ import Study from "./pages/Study";
 import StudySubject from "./pages/StudySubject";
 import AdminStudy from "./pages/AdminStudy";
 import Grades from "./pages/Grades";
+import Ranking from "./pages/Ranking";
 import AdminMetrics from "./pages/AdminMetrics";
 import Focus from "./pages/Focus";
 import Install from "./pages/Install";
@@ -68,6 +69,7 @@ const App = () => (
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/grades" element={<Grades />} />
+                <Route path="/ranking" element={<Ranking />} />
                 <Route path="/focus" element={<Focus />} />
                 <Route path="/install" element={<Install />} />
                 {/* Admin routes */}
