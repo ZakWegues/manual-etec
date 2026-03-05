@@ -459,6 +459,19 @@ export type Database = {
     }
     Functions: {
       generate_activity_notifications: { Args: never; Returns: undefined }
+      get_user_rankings: {
+        Args: { p_subject_id?: string }
+        Returns: {
+          activities_completed: number
+          avatar_url: string
+          avg_grade: number
+          full_name: string
+          on_time_count: number
+          rank_position: number
+          total_score: number
+          user_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

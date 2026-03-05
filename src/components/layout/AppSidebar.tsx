@@ -1,4 +1,4 @@
-import { Calendar, BookOpen, GraduationCap, LayoutDashboard, LogOut, Settings, Bot, MessageSquare, KeyRound, User, ChevronUp, PlayCircle, BarChart3, Star, Timer, Download } from 'lucide-react';
+import { Calendar, BookOpen, GraduationCap, LayoutDashboard, LogOut, Settings, Bot, MessageSquare, KeyRound, User, ChevronUp, PlayCircle, BarChart3, Star, Timer, Download, Trophy } from 'lucide-react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -30,6 +30,7 @@ const mainNavItems = [
   { title: 'Matérias', url: '/subjects', icon: BookOpen },
   { title: 'Estudo', url: '/study', icon: PlayCircle },
   { title: 'Notas', url: '/grades', icon: Star },
+  { title: 'Ranking', url: '/ranking', icon: Trophy },
   { title: 'Modo Foco', url: '/focus', icon: Timer },
   { title: 'Calendário', url: '/calendar', icon: Calendar },
   { title: 'Assistente IA', url: '/ai-assistant', icon: Bot },
