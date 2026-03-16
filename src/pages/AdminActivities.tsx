@@ -15,6 +15,7 @@ import { Calendar, Copy, Edit2, GraduationCap, Loader2, Plus, Trash2, Youtube, F
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { Activity } from '@/types/database';
+import { ACTIVITY_TYPES } from '@/types/database';
 import { ActivityVideoManager, type ResourceItem } from '@/components/admin/ActivityVideoManager';
 
 export default function AdminActivities() {
