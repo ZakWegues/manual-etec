@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { format, isAfter, isBefore, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useSubjects } from '@/hooks/useSubjects';
+import { ACTIVITY_TYPES } from '@/types/database';
 
 type Activity = {
   id: string;
