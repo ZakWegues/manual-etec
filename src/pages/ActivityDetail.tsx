@@ -8,6 +8,7 @@ import { ArrowLeft, Calendar, CheckCircle2, Clock, ExternalLink, FileText, Gradu
 import { ACTIVITY_TYPES } from '@/types/database';
 import { format, isPast, isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { parseLocalDate } from '@/lib/utils';
 import { ptBR } from 'date-fns/locale';
 
 function getYouTubeEmbedUrl(url: string | null): string | null {
