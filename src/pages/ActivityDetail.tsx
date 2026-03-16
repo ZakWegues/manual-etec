@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Calendar, CheckCircle2, Clock, ExternalLink, FileText, GraduationCap, Loader2, Youtube } from 'lucide-react';
+import { ACTIVITY_TYPES } from '@/types/database';
 import { format, isPast, isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { ptBR } from 'date-fns/locale';
