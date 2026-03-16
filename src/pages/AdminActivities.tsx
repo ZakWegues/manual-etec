@@ -52,6 +52,7 @@ export default function AdminActivities() {
     setTitle(activity.title);
     setDescription(activity.description || '');
     setDueDate(activity.due_date);
+    setActivityType(activity.activity_type || 'other');
     setResources(
       activity.videos?.map(v => ({
         youtube_url: v.youtube_url,
