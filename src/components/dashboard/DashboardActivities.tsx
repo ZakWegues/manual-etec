@@ -16,6 +16,7 @@ type Activity = {
   due_date: string;
   is_completed: boolean;
   subject_id: string;
+  activity_type?: string;
   subject?: { name: string; color: string | null } | null;
 };
 
