@@ -371,6 +371,19 @@ export default function AdminActivities() {
               </Select>
             </div>
             <div className="space-y-2">
+              <Label>Tipo de Atividade *</Label>
+              <Select value={activityType} onValueChange={setActivityType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ACTIVITY_TYPES.map((t) => (
+                    <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="edit-title">Título *</Label>
               <Input id="edit-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ex: Lista de exercícios 1" />
             </div>
