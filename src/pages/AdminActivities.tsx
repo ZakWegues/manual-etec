@@ -34,6 +34,7 @@ export default function AdminActivities() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [activityType, setActivityType] = useState('other');
   const [resources, setResources] = useState<ResourceItem[]>([]);
 
   const resetForm = () => {
