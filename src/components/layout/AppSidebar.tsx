@@ -1,4 +1,4 @@
-import { Calendar, BookOpen, GraduationCap, LayoutDashboard, LogOut, Settings, Bot, MessageSquare, KeyRound, User, ChevronUp, PlayCircle, BarChart3, Star, Timer, Download, Trophy } from 'lucide-react';
+import { Calendar, BookOpen, GraduationCap, LayoutDashboard, LogOut, Settings, MessageSquare, KeyRound, User, ChevronUp, PlayCircle, BarChart3, Star, Timer, Download, Trophy } from 'lucide-react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
