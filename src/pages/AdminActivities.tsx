@@ -90,6 +90,7 @@ export default function AdminActivities() {
       title,
       description: description || null,
       due_date: dueDate,
+      activity_type: activityType,
       youtube_url: validResources.find(v => v.type === 'video')?.youtube_url || null,
     }, {
       onSuccess: (data) => {
