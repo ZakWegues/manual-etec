@@ -15,6 +15,7 @@ import { Calendar, Copy, Edit2, GraduationCap, Loader2, Plus, Trash2, Youtube, F
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { Activity } from '@/types/database';
+import { ACTIVITY_TYPES } from '@/types/database';
 import { ActivityVideoManager, type ResourceItem } from '@/components/admin/ActivityVideoManager';
 
 export default function AdminActivities() {
@@ -33,6 +34,7 @@ export default function AdminActivities() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [activityType, setActivityType] = useState('other');
   const [resources, setResources] = useState<ResourceItem[]>([]);
 
   const resetForm = () => {
@@ -40,6 +42,7 @@ export default function AdminActivities() {
     setTitle('');
     setDescription('');
     setDueDate('');
+    setActivityType('other');
     setResources([]);
   };
 
@@ -49,6 +52,7 @@ export default function AdminActivities() {
     setTitle(activity.title);
     setDescription(activity.description || '');
     setDueDate(activity.due_date);
+    setActivityType(activity.activity_type || 'other');
     setResources(
       activity.videos?.map(v => ({
         youtube_url: v.youtube_url,
@@ -64,6 +68,7 @@ export default function AdminActivities() {
     setTitle(activity.title + ' (cópia)');
     setDescription(activity.description || '');
     setDueDate(activity.due_date);
+    setActivityType(activity.activity_type || 'other');
     setResources(
       activity.videos?.map(v => ({
         youtube_url: v.youtube_url,
@@ -85,6 +90,7 @@ export default function AdminActivities() {
       title,
       description: description || null,
       due_date: dueDate,
+      activity_type: activityType,
       youtube_url: validResources.find(v => v.type === 'video')?.youtube_url || null,
     }, {
       onSuccess: (data) => {
@@ -111,6 +117,7 @@ export default function AdminActivities() {
       title,
       description: description || null,
       due_date: dueDate,
+      activity_type: activityType,
       youtube_url: validResources.find(v => v.type === 'video')?.youtube_url || null,
     }, {
       onSuccess: () => {
@@ -199,6 +206,19 @@ export default function AdminActivities() {
                 </Select>
               </div>
               <div className="space-y-2">
+                <Label>Tipo de Atividade *</Label>
+                <Select value={activityType} onValueChange={setActivityType}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ACTIVITY_TYPES.map((t) => (
+                      <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="create-title">Título *</Label>
                 <Input id="create-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ex: Lista de exercícios 1" />
               </div>
@@ -263,6 +283,11 @@ export default function AdminActivities() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-medium">{activity.title}</span>
+                            {activity.activity_type && activity.activity_type !== 'other' && (
+                              <Badge variant="outline" className="text-xs">
+                                {ACTIVITY_TYPES.find(t => t.value === activity.activity_type)?.label || activity.activity_type}
+                              </Badge>
+                            )}
                             {videoCount > 0 && (
                               <Badge variant="secondary" className="text-xs">
                                 <Youtube className="h-3 w-3 mr-1" />
@@ -346,6 +371,19 @@ export default function AdminActivities() {
                         {s.name}
                       </div>
                     </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Tipo de Atividade *</Label>
+              <Select value={activityType} onValueChange={setActivityType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ACTIVITY_TYPES.map((t) => (
+                    <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>

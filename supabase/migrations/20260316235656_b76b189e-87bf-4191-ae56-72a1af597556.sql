@@ -1,0 +1,1 @@
+ALTER TABLE public.activities ADD COLUMN activity_type text NOT NULL DEFAULT 'other';

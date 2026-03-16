@@ -37,6 +37,17 @@ export interface Subject {
   updated_at: string;
 }
 
+export const ACTIVITY_TYPES = [
+  { value: 'prova', label: 'Prova' },
+  { value: 'lista', label: 'Lista de Exercícios' },
+  { value: 'trabalho', label: 'Trabalho' },
+  { value: 'seminario', label: 'Seminário' },
+  { value: 'projeto', label: 'Projeto' },
+  { value: 'other', label: 'Outro' },
+] as const;
+
+export type ActivityType = typeof ACTIVITY_TYPES[number]['value'];
+
 export interface Activity {
   id: string;
   subject_id: string;
@@ -44,6 +55,7 @@ export interface Activity {
   description: string | null;
   due_date: string;
   youtube_url: string | null;
+  activity_type: string;
   created_at: string;
   updated_at: string;
   subject?: Subject;

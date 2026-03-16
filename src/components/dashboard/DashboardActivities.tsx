@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { format, isAfter, isBefore, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useSubjects } from '@/hooks/useSubjects';
+import { ACTIVITY_TYPES } from '@/types/database';
 
 type Activity = {
   id: string;
@@ -15,6 +16,7 @@ type Activity = {
   due_date: string;
   is_completed: boolean;
   subject_id: string;
+  activity_type?: string;
   subject?: { name: string; color: string | null } | null;
 };
 
@@ -71,6 +73,9 @@ export function DashboardActivities({ activities }: DashboardActivitiesProps) {
                     <p className="font-medium text-xs sm:text-sm truncate">{activity.title}</p>
                     <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
                       {activity.subject?.name}
+                      {activity.activity_type && activity.activity_type !== 'other' && (
+                        <span className="ml-1">• {ACTIVITY_TYPES.find(t => t.value === activity.activity_type)?.label}</span>
+                      )}
                     </p>
                   </div>
                 </div>

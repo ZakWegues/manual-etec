@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Calendar, CheckCircle2, Clock, ExternalLink, FileText, GraduationCap, Loader2, Youtube } from 'lucide-react';
+import { ACTIVITY_TYPES } from '@/types/database';
 import { format, isPast, isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { ptBR } from 'date-fns/locale';
@@ -91,6 +92,11 @@ export default function ActivityDetail() {
               {activity.subject && (
                 <Badge style={{ backgroundColor: `${activity.subject.color}20`, color: activity.subject.color }}>
                   {activity.subject.name}
+                </Badge>
+              )}
+              {activity.activity_type && activity.activity_type !== 'other' && (
+                <Badge variant="secondary">
+                  {ACTIVITY_TYPES.find(t => t.value === activity.activity_type)?.label || activity.activity_type}
                 </Badge>
               )}
               {videoResources.length > 0 && (
