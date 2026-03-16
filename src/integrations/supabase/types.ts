@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       activities: {
         Row: {
+          activity_type: string
           created_at: string
           description: string | null
           due_date: string
@@ -26,6 +27,7 @@ export type Database = {
           youtube_url: string | null
         }
         Insert: {
+          activity_type?: string
           created_at?: string
           description?: string | null
           due_date: string
@@ -36,6 +38,7 @@ export type Database = {
           youtube_url?: string | null
         }
         Update: {
+          activity_type?: string
           created_at?: string
           description?: string | null
           due_date?: string
