@@ -73,6 +73,9 @@ export function DashboardActivities({ activities }: DashboardActivitiesProps) {
                     <p className="font-medium text-xs sm:text-sm truncate">{activity.title}</p>
                     <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
                       {activity.subject?.name}
+                      {activity.activity_type && activity.activity_type !== 'other' && (
+                        <span className="ml-1">• {ACTIVITY_TYPES.find(t => t.value === activity.activity_type)?.label}</span>
+                      )}
                     </p>
                   </div>
                 </div>
