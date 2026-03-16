@@ -42,6 +42,7 @@ export default function AdminActivities() {
     setTitle('');
     setDescription('');
     setDueDate('');
+    setActivityType('other');
     setResources([]);
   };
 
