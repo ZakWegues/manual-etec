@@ -283,6 +283,11 @@ export default function AdminActivities() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-medium">{activity.title}</span>
+                            {activity.activity_type && activity.activity_type !== 'other' && (
+                              <Badge variant="outline" className="text-xs">
+                                {ACTIVITY_TYPES.find(t => t.value === activity.activity_type)?.label || activity.activity_type}
+                              </Badge>
+                            )}
                             {videoCount > 0 && (
                               <Badge variant="secondary" className="text-xs">
                                 <Youtube className="h-3 w-3 mr-1" />

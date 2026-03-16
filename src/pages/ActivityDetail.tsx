@@ -94,6 +94,11 @@ export default function ActivityDetail() {
                   {activity.subject.name}
                 </Badge>
               )}
+              {activity.activity_type && activity.activity_type !== 'other' && (
+                <Badge variant="secondary">
+                  {ACTIVITY_TYPES.find(t => t.value === activity.activity_type)?.label || activity.activity_type}
+                </Badge>
+              )}
               {videoResources.length > 0 && (
                 <Badge variant="outline" className="gap-1">
                   <Youtube className="h-3 w-3" />
