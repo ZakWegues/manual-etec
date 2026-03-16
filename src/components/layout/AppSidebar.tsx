@@ -24,16 +24,21 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 
-const mainNavItems = [
+const principalItems = [
   { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
-  { title: 'Cronograma', url: '/schedule', icon: Calendar },
   { title: 'Matérias', url: '/subjects', icon: BookOpen },
+  { title: 'Calendário', url: '/calendar', icon: Calendar },
+];
+
+const estudoItems = [
+  { title: 'Cronograma', url: '/schedule', icon: Calendar },
   { title: 'Estudo', url: '/study', icon: PlayCircle },
+  { title: 'Modo Foco', url: '/focus', icon: Timer },
   { title: 'Notas', url: '/grades', icon: Star },
   { title: 'Ranking', url: '/ranking', icon: Trophy },
-  { title: 'Modo Foco', url: '/focus', icon: Timer },
-  { title: 'Calendário', url: '/calendar', icon: Calendar },
-  { title: 'Assistente IA', url: '/ai-assistant', icon: Bot },
+];
+
+const outrosItems = [
   { title: 'Instalar App', url: '/install', icon: Download },
 ];
 
