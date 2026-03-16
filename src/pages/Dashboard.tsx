@@ -1,36 +1,22 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useActivities } from '@/hooks/useActivities';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { BookOpen, Calendar, CheckCircle2, Clock, GraduationCap, TrendingUp } from 'lucide-react';
+import { BookOpen, Calendar, CheckCircle2, GraduationCap, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { format, isAfter, isBefore, addDays } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { WeeklyChart } from '@/components/dashboard/WeeklyChart';
-import { SubjectChart } from '@/components/dashboard/SubjectChart';
+import { DashboardActivities } from '@/components/dashboard/DashboardActivities';
+import { MiniAIAssistant } from '@/components/dashboard/MiniAIAssistant';
 
 export default function Dashboard() {
   const { profile, isAdmin } = useAuth();
   const { data: activities = [] } = useActivities();
 
-  const today = new Date();
   const completedActivities = activities.filter((a) => a.is_completed);
   const pendingActivities = activities.filter((a) => !a.is_completed);
-  const upcomingActivities = pendingActivities
-    .filter((a) => isAfter(new Date(a.due_date), today))
-    .slice(0, 5);
-  const overdueActivities = pendingActivities.filter((a) => 
-    isBefore(new Date(a.due_date), today)
-  );
-  const dueSoonActivities = pendingActivities.filter((a) => {
-    const dueDate = new Date(a.due_date);
-    return isAfter(dueDate, today) && isBefore(dueDate, addDays(today, 3));
-  });
 
-  const completionRate = activities.length > 0 
-    ? Math.round((completedActivities.length / activities.length) * 100) 
+  const completionRate = activities.length > 0
+    ? Math.round((completedActivities.length / activities.length) * 100)
     : 0;
 
   return (
@@ -84,139 +70,47 @@ export default function Dashboard() {
       </div>
 
       {/* Content Grid */}
-      <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
-        {/* Upcoming Activities */}
-        <Card>
-          <CardHeader className="px-3 sm:px-6 pt-3 sm:pt-6">
-            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-              <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-              Próximas Atividades
-            </CardTitle>
-            <CardDescription className="text-xs sm:text-sm">Atividades com entrega em breve</CardDescription>
-          </CardHeader>
-          <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
-            {upcomingActivities.length === 0 ? (
-              <p className="text-center text-muted-foreground py-6 sm:py-8 text-sm">
-                Nenhuma atividade pendente! 🎉
-              </p>
-            ) : (
-              <div className="space-y-2 sm:space-y-3">
-                {upcomingActivities.map((activity) => {
-                  const isDueSoon = dueSoonActivities.some((a) => a.id === activity.id);
-                  return (
-                    <Link
-                      key={activity.id}
-                      to={`/subjects/${activity.subject_id}/activities/${activity.id}`}
-                      className="block"
-                    >
-                      <div className={`flex items-center justify-between p-2 sm:p-3 rounded-lg border transition-colors hover:bg-muted/50 ${isDueSoon ? 'border-warning/50 bg-warning/5' : ''}`}>
-                        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                          <div
-                            className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full flex-shrink-0"
-                            style={{ backgroundColor: activity.subject?.color || '#3B82F6' }}
-                          />
-                          <div className="min-w-0 flex-1">
-                            <p className="font-medium text-xs sm:text-sm truncate">{activity.title}</p>
-                            <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
-                              {activity.subject?.name}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-                          {isDueSoon && (
-                            <Badge variant="outline" className="text-[10px] sm:text-xs text-warning border-warning hidden sm:inline-flex">
-                              Em breve
-                            </Badge>
-                          )}
-                          <span className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">
-                            {format(new Date(activity.due_date), "dd 'de' MMM", { locale: ptBR })}
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
-            {activities.length > 0 && (
-              <Button variant="ghost" className="w-full mt-3 sm:mt-4 text-xs sm:text-sm" asChild>
-                <Link to="/calendar">Ver todas no calendário</Link>
-              </Button>
-            )}
-          </CardContent>
-        </Card>
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-5">
+        {/* Activities - takes 3/5 of space */}
+        <div className="lg:col-span-3">
+          <DashboardActivities activities={activities} />
+        </div>
 
-        {/* Overdue Activities */}
-        {overdueActivities.length > 0 && (
-          <Card className="border-destructive/50">
-            <CardHeader className="px-3 sm:px-6 pt-3 sm:pt-6">
-              <CardTitle className="flex items-center gap-2 text-destructive text-base sm:text-lg">
-                <Clock className="h-4 w-4 sm:h-5 sm:w-5" />
-                Atividades Atrasadas
-              </CardTitle>
-              <CardDescription className="text-xs sm:text-sm">Atividades que passaram da data de entrega</CardDescription>
-            </CardHeader>
-            <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
-              <div className="space-y-2 sm:space-y-3">
-                {overdueActivities.slice(0, 5).map((activity) => (
-                  <Link
-                    key={activity.id}
-                    to={`/subjects/${activity.subject_id}/activities/${activity.id}`}
-                    className="block"
-                  >
-                    <div className="flex items-center justify-between p-2 sm:p-3 rounded-lg border border-destructive/30 bg-destructive/5 transition-colors hover:bg-destructive/10">
-                      <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                        <div
-                          className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full flex-shrink-0"
-                          style={{ backgroundColor: activity.subject?.color || '#3B82F6' }}
-                        />
-                        <div className="min-w-0 flex-1">
-                          <p className="font-medium text-xs sm:text-sm truncate">{activity.title}</p>
-                          <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
-                            {activity.subject?.name}
-                          </p>
-                        </div>
-                      </div>
-                      <Badge variant="destructive" className="text-[10px] sm:text-xs flex-shrink-0">
-                        {format(new Date(activity.due_date), "dd/MM", { locale: ptBR })}
-                      </Badge>
-                    </div>
+        {/* Right column */}
+        <div className="lg:col-span-2 flex flex-col gap-4 sm:gap-6">
+          {/* Mini AI Assistant */}
+          <MiniAIAssistant />
+
+          {/* Quick Actions for Admin */}
+          {isAdmin && (
+            <Card>
+              <CardHeader className="px-3 sm:px-6 pt-3 sm:pt-6">
+                <CardTitle className="text-base sm:text-lg">Ações Rápidas</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">Gerencie o conteúdo da plataforma</CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-2 sm:gap-3 px-3 sm:px-6 pb-3 sm:pb-6">
+                <Button asChild variant="outline" className="justify-start text-xs sm:text-sm">
+                  <Link to="/admin/subjects">
+                    <BookOpen className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                    Gerenciar Matérias
                   </Link>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Quick Actions for Admin */}
-        {isAdmin && overdueActivities.length === 0 && (
-          <Card>
-            <CardHeader className="px-3 sm:px-6 pt-3 sm:pt-6">
-              <CardTitle className="text-base sm:text-lg">Ações Rápidas</CardTitle>
-              <CardDescription className="text-xs sm:text-sm">Gerencie o conteúdo da plataforma</CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-2 sm:gap-3 px-3 sm:px-6 pb-3 sm:pb-6">
-              <Button asChild variant="outline" className="justify-start text-xs sm:text-sm">
-                <Link to="/admin/subjects">
-                  <BookOpen className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-                  Gerenciar Matérias
-                </Link>
-              </Button>
-              <Button asChild variant="outline" className="justify-start text-xs sm:text-sm">
-                <Link to="/admin/activities">
-                  <GraduationCap className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-                  Gerenciar Atividades
-                </Link>
-              </Button>
-              <Button asChild variant="outline" className="justify-start text-xs sm:text-sm">
-                <Link to="/schedule">
-                  <Calendar className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-                  Editar Cronograma
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+                </Button>
+                <Button asChild variant="outline" className="justify-start text-xs sm:text-sm">
+                  <Link to="/admin/activities">
+                    <GraduationCap className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                    Gerenciar Atividades
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="justify-start text-xs sm:text-sm">
+                  <Link to="/schedule">
+                    <Calendar className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                    Editar Cronograma
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   );

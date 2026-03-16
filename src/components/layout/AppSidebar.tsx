@@ -1,4 +1,4 @@
-import { Calendar, BookOpen, GraduationCap, LayoutDashboard, LogOut, Settings, Bot, MessageSquare, KeyRound, User, ChevronUp, PlayCircle, BarChart3, Star, Timer, Download, Trophy } from 'lucide-react';
+import { Calendar, BookOpen, GraduationCap, LayoutDashboard, LogOut, Settings, MessageSquare, KeyRound, User, ChevronUp, PlayCircle, BarChart3, Star, Timer, Download, Trophy } from 'lucide-react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -24,16 +24,21 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 
-const mainNavItems = [
+const principalItems = [
   { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
-  { title: 'Cronograma', url: '/schedule', icon: Calendar },
   { title: 'Matérias', url: '/subjects', icon: BookOpen },
+  { title: 'Calendário', url: '/calendar', icon: Calendar },
+];
+
+const estudoItems = [
+  { title: 'Cronograma', url: '/schedule', icon: Calendar },
   { title: 'Estudo', url: '/study', icon: PlayCircle },
+  { title: 'Modo Foco', url: '/focus', icon: Timer },
   { title: 'Notas', url: '/grades', icon: Star },
   { title: 'Ranking', url: '/ranking', icon: Trophy },
-  { title: 'Modo Foco', url: '/focus', icon: Timer },
-  { title: 'Calendário', url: '/calendar', icon: Calendar },
-  { title: 'Assistente IA', url: '/ai-assistant', icon: Bot },
+];
+
+const outrosItems = [
   { title: 'Instalar App', url: '/install', icon: Download },
 ];
 
@@ -89,17 +94,49 @@ export function AppSidebar() {
 
       <SidebarContent className="custom-scrollbar">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/50">Menu Principal</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-sidebar-foreground/50">Principal</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainNavItems.map((item) => (
+              {principalItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.url)}
-                    tooltip={item.title}
-                  >
+                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
                     <NavLink to={item.url} data-sidebar-item={item.title}>
+                      <item.icon className="h-5 w-5" />
+                      <span>{item.title}</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-sidebar-foreground/50">Estudo</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {estudoItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
+                    <NavLink to={item.url}>
+                      <item.icon className="h-5 w-5" />
+                      <span>{item.title}</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-sidebar-foreground/50">Outros</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {outrosItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
+                    <NavLink to={item.url}>
                       <item.icon className="h-5 w-5" />
                       <span>{item.title}</span>
                     </NavLink>
