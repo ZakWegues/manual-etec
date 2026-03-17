@@ -3,6 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { ActivityWithProgress } from '@/types/database';
 import { startOfWeek, subWeeks, isAfter, isBefore, addWeeks, format } from 'date-fns';
+import { parseLocalDate } from '@/lib/utils';
 import { ptBR } from 'date-fns/locale';
 
 interface WeeklyChartProps {

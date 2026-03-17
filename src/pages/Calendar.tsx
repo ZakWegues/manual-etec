@@ -8,6 +8,7 @@ import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, CheckCircle2, Cloc
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, isToday, isPast } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
+import { parseLocalDate } from '@/lib/utils';
 import type { ActivityWithProgress } from '@/types/database';
 import { generateIcsFile, downloadIcsFile } from '@/lib/icsGenerator';
 import { toast } from 'sonner';

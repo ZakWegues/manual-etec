@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useSchedule, useUpdateSchedule } from '@/hooks/useSchedule';
 import { useSubjects } from '@/hooks/useSubjects';
 import { useActivities } from '@/hooks/useActivities';
+import { parseLocalDate } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
