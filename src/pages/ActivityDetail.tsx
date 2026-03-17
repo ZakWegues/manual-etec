@@ -115,6 +115,19 @@ export default function ActivityDetail() {
               )}
             </div>
             <h1 className="text-3xl font-bold tracking-tight">{activity.title}</h1>
+            {activity.creator && (
+              <div className="flex items-center gap-2 mt-2">
+                <Avatar className="h-6 w-6">
+                  <AvatarImage src={activity.creator.avatar_url || undefined} />
+                  <AvatarFallback className="text-[10px] bg-muted">
+                    <User className="h-3 w-3" />
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-sm text-muted-foreground">
+                  Publicada por <span className="font-medium text-foreground">{activity.creator.full_name || 'Professor'}</span>
+                </span>
+              </div>
+            )}
           </div>
 
           <Button
