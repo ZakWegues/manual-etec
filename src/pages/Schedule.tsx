@@ -43,7 +43,7 @@ export default function SchedulePage() {
   // Get activities for a specific day
   const getActivitiesForDay = (dayDate: Date) => {
     return activities.filter((activity) => {
-      const activityDate = new Date(activity.due_date);
+      const activityDate = parseLocalDate(activity.due_date);
       return isSameDay(activityDate, dayDate);
     });
   };

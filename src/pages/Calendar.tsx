@@ -69,7 +69,7 @@ export default function CalendarPage() {
   const activitiesByDate = useMemo(() => {
     const map = new Map<string, ActivityWithProgress[]>();
     activities.forEach((activity) => {
-      const dateKey = format(new Date(activity.due_date), 'yyyy-MM-dd');
+      const dateKey = format(parseLocalDate(activity.due_date), 'yyyy-MM-dd');
       if (!map.has(dateKey)) {
         map.set(dateKey, []);
       }

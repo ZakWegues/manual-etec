@@ -87,7 +87,7 @@ export function DashboardActivities({ activities }: DashboardActivitiesProps) {
                     </Badge>
                   )}
                   <span className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">
-                    {format(new Date(activity.due_date), "dd 'de' MMM", { locale: ptBR })}
+                    {format(parseLocalDate(activity.due_date), "dd 'de' MMM", { locale: ptBR })}
                   </span>
                 </div>
               </div>

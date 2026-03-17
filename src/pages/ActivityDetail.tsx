@@ -56,7 +56,7 @@ export default function ActivityDetail() {
     );
   }
 
-  const dueDate = new Date(activity.due_date);
+  const dueDate = parseLocalDate(activity.due_date);
   const isOverdue = isPast(dueDate) && !isToday(dueDate) && !activity.is_completed;
   const isDueToday = isToday(dueDate);
 
