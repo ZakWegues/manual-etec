@@ -118,4 +118,5 @@ export interface Grade {
 
 export interface ActivityWithProgress extends Activity {
   is_completed: boolean;
+  creator?: { full_name: string | null; avatar_url: string | null } | null;
 }
