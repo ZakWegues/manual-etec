@@ -56,6 +56,7 @@ export interface Activity {
   due_date: string;
   youtube_url: string | null;
   activity_type: string;
+  created_by: string | null;
   created_at: string;
   updated_at: string;
   subject?: Subject;
