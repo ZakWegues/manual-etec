@@ -70,6 +70,17 @@ export function useActivity(id: string | undefined) {
       if (error) throw error;
       if (!data) return null;
 
+      // Fetch creator profile
+      let creatorProfile = null;
+      if ((data as any).created_by) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('full_name, avatar_url')
+          .eq('user_id', (data as any).created_by)
+          .maybeSingle();
+        creatorProfile = profileData;
+      }
+
       // Check if completed
       let isCompleted = false;
       if (user) {
@@ -86,6 +97,7 @@ export function useActivity(id: string | undefined) {
       return {
         ...data,
         is_completed: isCompleted,
+        creator: creatorProfile,
       } as ActivityWithProgress;
     },
     enabled: !!id,
@@ -96,10 +108,10 @@ export function useCreateActivity() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (activity: Omit<Activity, 'id' | 'created_at' | 'updated_at' | 'subject'>) => {
+    mutationFn: async (activity: Omit<Activity, 'id' | 'created_at' | 'updated_at' | 'subject'> & { created_by?: string }) => {
       const { data, error } = await supabase
         .from('activities')
-        .insert(activity)
+        .insert(activity as any)
         .select()
         .single();
 

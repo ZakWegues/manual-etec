@@ -4,7 +4,8 @@ import { ActivityComments } from '@/components/ActivityComments';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Calendar, CheckCircle2, Clock, ExternalLink, FileText, GraduationCap, Loader2, Youtube } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ArrowLeft, Calendar, CheckCircle2, Clock, ExternalLink, FileText, GraduationCap, Loader2, User, Youtube } from 'lucide-react';
 import { ACTIVITY_TYPES } from '@/types/database';
 import { format, isPast, isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -114,6 +115,19 @@ export default function ActivityDetail() {
               )}
             </div>
             <h1 className="text-3xl font-bold tracking-tight">{activity.title}</h1>
+            {activity.creator && (
+              <div className="flex items-center gap-2 mt-2">
+                <Avatar className="h-6 w-6">
+                  <AvatarImage src={activity.creator.avatar_url || undefined} />
+                  <AvatarFallback className="text-[10px] bg-muted">
+                    <User className="h-3 w-3" />
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-sm text-muted-foreground">
+                  Publicada por <span className="font-medium text-foreground">{activity.creator.full_name || 'Professor'}</span>
+                </span>
+              </div>
+            )}
           </div>
 
           <Button

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useSubjects } from '@/hooks/useSubjects';
 import { useActivities, useCreateActivity, useUpdateActivity, useDeleteActivity } from '@/hooks/useActivities';
+import { useAuth } from '@/contexts/AuthContext';
 import { useBulkUpdateActivityVideos } from '@/hooks/useActivityVideos';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,7 @@ import { ACTIVITY_TYPES } from '@/types/database';
 import { ActivityVideoManager, type ResourceItem } from '@/components/admin/ActivityVideoManager';
 
 export default function AdminActivities() {
+  const { user } = useAuth();
   const { data: subjects = [] } = useSubjects();
   const { data: activities = [], isLoading } = useActivities();
   const createActivity = useCreateActivity();
@@ -92,6 +94,7 @@ export default function AdminActivities() {
       description: description || null,
       due_date: dueDate,
       activity_type: activityType,
+      created_by: user?.id || null,
       youtube_url: validResources.find(v => v.type === 'video')?.youtube_url || null,
     }, {
       onSuccess: (data) => {

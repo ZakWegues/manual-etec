@@ -56,6 +56,7 @@ export interface Activity {
   due_date: string;
   youtube_url: string | null;
   activity_type: string;
+  created_by: string | null;
   created_at: string;
   updated_at: string;
   subject?: Subject;
@@ -117,4 +118,5 @@ export interface Grade {
 
 export interface ActivityWithProgress extends Activity {
   is_completed: boolean;
+  creator?: { full_name: string | null; avatar_url: string | null } | null;
 }

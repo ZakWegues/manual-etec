@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           activity_type: string
           created_at: string
+          created_by: string | null
           description: string | null
           due_date: string
           id: string
@@ -29,6 +30,7 @@ export type Database = {
         Insert: {
           activity_type?: string
           created_at?: string
+          created_by?: string | null
           description?: string | null
           due_date: string
           id?: string
@@ -40,6 +42,7 @@ export type Database = {
         Update: {
           activity_type?: string
           created_at?: string
+          created_by?: string | null
           description?: string | null
           due_date?: string
           id?: string
