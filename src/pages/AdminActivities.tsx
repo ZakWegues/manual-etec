@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useSubjects } from '@/hooks/useSubjects';
 import { useActivities, useCreateActivity, useUpdateActivity, useDeleteActivity } from '@/hooks/useActivities';
+import { useAuth } from '@/contexts/AuthContext';
 import { useBulkUpdateActivityVideos } from '@/hooks/useActivityVideos';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
