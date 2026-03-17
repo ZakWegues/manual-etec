@@ -31,33 +31,89 @@ export default function ResetPassword() {
   const [errors, setErrors] = useState<{ password?: string; confirmPassword?: string }>({});
 
   useEffect(() => {
-    // Listen for PASSWORD_RECOVERY event from the auth state change
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') {
+    let active = true;
+
+    const clearAuthParamsFromUrl = () => {
+      const cleanUrl = `${window.location.origin}/reset-password`;
+      window.history.replaceState({}, document.title, cleanUrl);
+    };
+
+    const bootstrapRecoverySession = async () => {
+      const hashParams = new URLSearchParams(window.location.hash.replace('#', ''));
+      const queryParams = new URLSearchParams(window.location.search);
+
+      const accessToken = hashParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token');
+
+      if (accessToken && refreshToken) {
+        const { error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+
+        if (!error && active) {
+          clearAuthParamsFromUrl();
+          setIsReady(true);
+          setIsChecking(false);
+          return;
+        }
+      }
+
+      const tokenHash = queryParams.get('token_hash');
+      const recoveryType = queryParams.get('type');
+
+      if (tokenHash && recoveryType === 'recovery') {
+        const { error } = await supabase.auth.verifyOtp({
+          type: 'recovery',
+          token_hash: tokenHash,
+        });
+
+        if (!error && active) {
+          clearAuthParamsFromUrl();
+          setIsReady(true);
+          setIsChecking(false);
+          return;
+        }
+      }
+
+      const code = queryParams.get('code');
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+        if (!error && active) {
+          clearAuthParamsFromUrl();
+          setIsReady(true);
+          setIsChecking(false);
+          return;
+        }
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session && active) {
         setIsReady(true);
         setIsChecking(false);
-      } else if (event === 'SIGNED_IN') {
-        // User might already have a session from the recovery link
+        return;
+      }
+
+      if (active) {
+        toast.error('Link de redefinição inválido ou expirado. Solicite um novo email.');
+        navigate('/auth');
+      }
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (!active) return;
+      if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
         setIsReady(true);
         setIsChecking(false);
       }
     });
 
-    // Also check if there's already a session (user may have already been authenticated via the link)
-    const timer = setTimeout(async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        setIsReady(true);
-      } else {
-        toast.error('Link de redefinição inválido ou expirado');
-        navigate('/auth');
-      }
-      setIsChecking(false);
-    }, 3000);
+    bootstrapRecoverySession();
 
     return () => {
+      active = false;
       subscription.unsubscribe();
-      clearTimeout(timer);
     };
   }, [navigate]);
 
