@@ -9,6 +9,7 @@ import { format, isAfter, isBefore, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useSubjects } from '@/hooks/useSubjects';
 import { ACTIVITY_TYPES } from '@/types/database';
+import { parseLocalDate } from '@/lib/utils';
 
 type Activity = {
   id: string;
@@ -36,9 +37,9 @@ export function DashboardActivities({ activities }: DashboardActivitiesProps) {
     return pending.filter((a) => a.subject_id === subjectFilter);
   }, [pending, subjectFilter]);
 
-  const overdue = filtered.filter((a) => isBefore(new Date(a.due_date), today));
+  const overdue = filtered.filter((a) => isBefore(parseLocalDate(a.due_date), today));
   const dueSoon = filtered.filter((a) => {
-    const d = new Date(a.due_date);
+    const d = parseLocalDate(a.due_date);
     return isAfter(d, today) && isBefore(d, addDays(today, 3));
   });
   const allPending = filtered;
@@ -52,7 +53,7 @@ export function DashboardActivities({ activities }: DashboardActivitiesProps) {
     return (
       <div className="space-y-2">
         {items.map((activity) => {
-          const isOverdue = isBefore(new Date(activity.due_date), today);
+          const isOverdue = isBefore(parseLocalDate(activity.due_date), today);
           return (
             <Link
               key={activity.id}
@@ -86,7 +87,7 @@ export function DashboardActivities({ activities }: DashboardActivitiesProps) {
                     </Badge>
                   )}
                   <span className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">
-                    {format(new Date(activity.due_date), "dd 'de' MMM", { locale: ptBR })}
+                    {format(parseLocalDate(activity.due_date), "dd 'de' MMM", { locale: ptBR })}
                   </span>
                 </div>
               </div>

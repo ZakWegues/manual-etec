@@ -8,6 +8,7 @@ import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, CheckCircle2, Cloc
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, isToday, isPast } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
+import { parseLocalDate } from '@/lib/utils';
 import type { ActivityWithProgress } from '@/types/database';
 import { generateIcsFile, downloadIcsFile } from '@/lib/icsGenerator';
 import { toast } from 'sonner';
@@ -18,7 +19,7 @@ type ActivityStatus = 'completed' | 'pending' | 'overdue';
 
 const getActivityStatus = (activity: ActivityWithProgress): ActivityStatus => {
   if (activity.is_completed) return 'completed';
-  const dueDate = new Date(activity.due_date);
+  const dueDate = parseLocalDate(activity.due_date);
   if (isPast(dueDate) && !isToday(dueDate)) return 'overdue';
   return 'pending';
 };
@@ -69,7 +70,7 @@ export default function CalendarPage() {
   const activitiesByDate = useMemo(() => {
     const map = new Map<string, ActivityWithProgress[]>();
     activities.forEach((activity) => {
-      const dateKey = format(new Date(activity.due_date), 'yyyy-MM-dd');
+      const dateKey = format(parseLocalDate(activity.due_date), 'yyyy-MM-dd');
       if (!map.has(dateKey)) {
         map.set(dateKey, []);
       }

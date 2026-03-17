@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, Calendar, CheckCircle2, Clock, GraduationCap, Loader2, Play, Youtube } from 'lucide-react';
+import { parseLocalDate } from '@/lib/utils';
 import { format, isPast, isToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -99,7 +100,7 @@ export default function SubjectDetail() {
         ) : (
           <div className="space-y-3">
             {activities.map((activity) => {
-              const dueDate = new Date(activity.due_date);
+              const dueDate = parseLocalDate(activity.due_date);
               const isOverdue = isPast(dueDate) && !isToday(dueDate) && !activity.is_completed;
               const isDueToday = isToday(dueDate);
 

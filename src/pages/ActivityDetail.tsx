@@ -8,6 +8,7 @@ import { ArrowLeft, Calendar, CheckCircle2, Clock, ExternalLink, FileText, Gradu
 import { ACTIVITY_TYPES } from '@/types/database';
 import { format, isPast, isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { parseLocalDate } from '@/lib/utils';
 import { ptBR } from 'date-fns/locale';
 
 function getYouTubeEmbedUrl(url: string | null): string | null {
@@ -55,7 +56,7 @@ export default function ActivityDetail() {
     );
   }
 
-  const dueDate = new Date(activity.due_date);
+  const dueDate = parseLocalDate(activity.due_date);
   const isOverdue = isPast(dueDate) && !isToday(dueDate) && !activity.is_completed;
   const isDueToday = isToday(dueDate);
 

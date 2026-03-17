@@ -3,6 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { ActivityWithProgress } from '@/types/database';
 import { startOfWeek, subWeeks, isAfter, isBefore, addWeeks, format } from 'date-fns';
+import { parseLocalDate } from '@/lib/utils';
 import { ptBR } from 'date-fns/locale';
 
 interface WeeklyChartProps {
@@ -20,12 +21,12 @@ export function WeeklyChart({ activities }: WeeklyChartProps) {
 
       const completed = activities.filter(a => {
         if (!a.is_completed) return false;
-        const dueDate = new Date(a.due_date);
+        const dueDate = parseLocalDate(a.due_date);
         return isAfter(dueDate, weekStart) && isBefore(dueDate, weekEnd);
       }).length;
 
       const total = activities.filter(a => {
-        const dueDate = new Date(a.due_date);
+        const dueDate = parseLocalDate(a.due_date);
         return isAfter(dueDate, weekStart) && isBefore(dueDate, weekEnd);
       }).length;
 
