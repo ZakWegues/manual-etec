@@ -20,7 +20,7 @@ export function WeeklyChart({ activities }: WeeklyChartProps) {
 
       const completed = activities.filter(a => {
         if (!a.is_completed) return false;
-        const dueDate = new Date(a.due_date);
+        const dueDate = parseLocalDate(a.due_date);
         return isAfter(dueDate, weekStart) && isBefore(dueDate, weekEnd);
       }).length;
 
