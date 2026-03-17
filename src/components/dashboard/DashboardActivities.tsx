@@ -53,7 +53,7 @@ export function DashboardActivities({ activities }: DashboardActivitiesProps) {
     return (
       <div className="space-y-2">
         {items.map((activity) => {
-          const isOverdue = isBefore(new Date(activity.due_date), today);
+          const isOverdue = isBefore(parseLocalDate(activity.due_date), today);
           return (
             <Link
               key={activity.id}
