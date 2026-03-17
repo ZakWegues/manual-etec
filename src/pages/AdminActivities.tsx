@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, Copy, Edit2, GraduationCap, Loader2, Plus, Trash2, Youtube, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { parseLocalDate } from '@/lib/utils';
 import type { Activity } from '@/types/database';
 import { ACTIVITY_TYPES } from '@/types/database';
 import { ActivityVideoManager, type ResourceItem } from '@/components/admin/ActivityVideoManager';
