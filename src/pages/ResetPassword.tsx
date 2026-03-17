@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { GraduationCap, Loader2, Lock, CheckCircle2, AlertCircle } from 'lucide-react';
+import { GraduationCap, Loader2, Lock, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
@@ -20,27 +21,45 @@ const passwordSchema = z.object({
 
 export default function ResetPassword() {
   const navigate = useNavigate();
-  const { updatePassword, session } = useAuth();
+  const { updatePassword } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState<{ password?: string; confirmPassword?: string }>({});
 
-  // Check if user arrived via password reset link
   useEffect(() => {
-    // If no session, the user hasn't clicked the reset link yet
-    if (!session) {
-      // Wait a bit for the session to be established from the URL hash
-      const timer = setTimeout(() => {
-        if (!session) {
-          toast.error('Link de redefinição inválido ou expirado');
-          navigate('/auth');
-        }
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [session, navigate]);
+    // Listen for PASSWORD_RECOVERY event from the auth state change
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setIsReady(true);
+        setIsChecking(false);
+      } else if (event === 'SIGNED_IN') {
+        // User might already have a session from the recovery link
+        setIsReady(true);
+        setIsChecking(false);
+      }
+    });
+
+    // Also check if there's already a session (user may have already been authenticated via the link)
+    const timer = setTimeout(async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setIsReady(true);
+      } else {
+        toast.error('Link de redefinição inválido ou expirado');
+        navigate('/auth');
+      }
+      setIsChecking(false);
+    }, 3000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timer);
+    };
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,7 +118,7 @@ export default function ResetPassword() {
                   Sua senha foi alterada com sucesso. Você será redirecionado em instantes...
                 </AlertDescription>
               </Alert>
-            ) : !session ? (
+            ) : isChecking && !isReady ? (
               <div className="flex flex-col items-center justify-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
                 <p className="text-muted-foreground text-sm">Verificando link de redefinição...</p>
