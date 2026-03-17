@@ -37,9 +37,9 @@ export function DashboardActivities({ activities }: DashboardActivitiesProps) {
     return pending.filter((a) => a.subject_id === subjectFilter);
   }, [pending, subjectFilter]);
 
-  const overdue = filtered.filter((a) => isBefore(new Date(a.due_date), today));
+  const overdue = filtered.filter((a) => isBefore(parseLocalDate(a.due_date), today));
   const dueSoon = filtered.filter((a) => {
-    const d = new Date(a.due_date);
+    const d = parseLocalDate(a.due_date);
     return isAfter(d, today) && isBefore(d, addDays(today, 3));
   });
   const allPending = filtered;
