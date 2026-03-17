@@ -18,7 +18,7 @@ type ActivityStatus = 'completed' | 'pending' | 'overdue';
 
 const getActivityStatus = (activity: ActivityWithProgress): ActivityStatus => {
   if (activity.is_completed) return 'completed';
-  const dueDate = new Date(activity.due_date);
+  const dueDate = parseLocalDate(activity.due_date);
   if (isPast(dueDate) && !isToday(dueDate)) return 'overdue';
   return 'pending';
 };
