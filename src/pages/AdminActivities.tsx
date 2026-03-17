@@ -21,6 +21,7 @@ import { ACTIVITY_TYPES } from '@/types/database';
 import { ActivityVideoManager, type ResourceItem } from '@/components/admin/ActivityVideoManager';
 
 export default function AdminActivities() {
+  const { user } = useAuth();
   const { data: subjects = [] } = useSubjects();
   const { data: activities = [], isLoading } = useActivities();
   const createActivity = useCreateActivity();
