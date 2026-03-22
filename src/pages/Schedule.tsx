@@ -31,10 +31,11 @@ export default function SchedulePage() {
   const [editingCell, setEditingCell] = useState<Schedule | null>(null);
   const [selectedSubject, setSelectedSubject] = useState<string>('');
   const [customText, setCustomText] = useState('');
+  const [weekOffset, setWeekOffset] = useState(0);
 
   // Calculate current week dates
   const today = new Date();
-  const weekStart = startOfWeek(today, { weekStartsOn: 1 }); // Monday
+  const weekStart = addDays(startOfWeek(today, { weekStartsOn: 1 }), weekOffset * 7);
   const weekDates = DAYS.map((_, idx) => addDays(weekStart, idx));
 
   const getScheduleCell = (day: number, period: number) => {
