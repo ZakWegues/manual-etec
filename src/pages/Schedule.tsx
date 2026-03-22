@@ -79,10 +79,28 @@ export default function SchedulePage() {
   return (
     <div className="space-y-4 sm:space-y-6 animate-fade-in">
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2 sm:gap-3">
-          <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
-          Cronograma Semanal
-        </h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2 sm:gap-3">
+            <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+            Cronograma Semanal
+          </h1>
+          <div className="flex items-center gap-1 sm:gap-2">
+            {weekOffset !== 0 && (
+              <Button variant="outline" size="sm" onClick={() => setWeekOffset(0)} className="text-xs">
+                Hoje
+              </Button>
+            )}
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setWeekOffset(prev => prev - 1)}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="text-xs sm:text-sm font-medium text-muted-foreground min-w-[90px] text-center">
+              {format(weekDates[0], 'dd/MM', { locale: ptBR })} - {format(weekDates[4], 'dd/MM', { locale: ptBR })}
+            </span>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setWeekOffset(prev => prev + 1)}>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
         <p className="text-sm sm:text-base text-muted-foreground">
           {isAdmin ? 'Clique em uma célula para editar' : 'Visualize o horário de aulas da semana'}
         </p>
