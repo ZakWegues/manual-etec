@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Calendar, Edit2, Loader2, ClipboardList, CheckCircle2 } from 'lucide-react';
+import { Calendar, Edit2, Loader2, ClipboardList, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { format, isToday, startOfWeek, addDays, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -31,10 +31,11 @@ export default function SchedulePage() {
   const [editingCell, setEditingCell] = useState<Schedule | null>(null);
   const [selectedSubject, setSelectedSubject] = useState<string>('');
   const [customText, setCustomText] = useState('');
+  const [weekOffset, setWeekOffset] = useState(0);
 
   // Calculate current week dates
   const today = new Date();
-  const weekStart = startOfWeek(today, { weekStartsOn: 1 }); // Monday
+  const weekStart = addDays(startOfWeek(today, { weekStartsOn: 1 }), weekOffset * 7);
   const weekDates = DAYS.map((_, idx) => addDays(weekStart, idx));
 
   const getScheduleCell = (day: number, period: number) => {
@@ -78,10 +79,28 @@ export default function SchedulePage() {
   return (
     <div className="space-y-4 sm:space-y-6 animate-fade-in">
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2 sm:gap-3">
-          <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
-          Cronograma Semanal
-        </h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2 sm:gap-3">
+            <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+            Cronograma Semanal
+          </h1>
+          <div className="flex items-center gap-1 sm:gap-2">
+            {weekOffset !== 0 && (
+              <Button variant="outline" size="sm" onClick={() => setWeekOffset(0)} className="text-xs">
+                Hoje
+              </Button>
+            )}
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setWeekOffset(prev => prev - 1)}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="text-xs sm:text-sm font-medium text-muted-foreground min-w-[90px] text-center">
+              {format(weekDates[0], 'dd/MM', { locale: ptBR })} - {format(weekDates[4], 'dd/MM', { locale: ptBR })}
+            </span>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setWeekOffset(prev => prev + 1)}>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
         <p className="text-sm sm:text-base text-muted-foreground">
           {isAdmin ? 'Clique em uma célula para editar' : 'Visualize o horário de aulas da semana'}
         </p>
